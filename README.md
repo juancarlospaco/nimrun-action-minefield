@@ -1,0 +1,2 @@
+# nimrun-action-minefield
+Minefield
