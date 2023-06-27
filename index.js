@@ -283,7 +283,10 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
           }
           else if (!isDevelOk && isStableOk) {
             // Git clone Nim repo to bisect commit by commit between devel and stable.
-            execSync("git clone https://github.com/nim-lang/Nim.git && cd Nim && ./build_all.sh && nim c ./koch.nim")
+            console.log(execSync("git clone https://github.com/nim-lang/Nim.git"))
+            console.log(execSync("cd Nim && nim c ./koch.nim"))
+            // console.log(execSync("git clone https://github.com/nim-lang/Nim.git && cd Nim && ./build_all.sh && nim c ./koch.nim"))
+
             for (let i = 1; i < 99; i = i * 2) {
               // Checkout the commit
               console.log(`git checkout HEAD~${i} && git rev-parse --short HEAD`)
