@@ -1,4 +1,4 @@
-name: 'nimrun-action'
+name: 'nimrun-action-minefield'
 description: 'Compile and run Nim source code from GitHub issue comments code blocks'
 inputs:
   github-token:
