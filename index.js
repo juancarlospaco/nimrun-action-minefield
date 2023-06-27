@@ -291,8 +291,8 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
 
             for (let i = 1; i < 99; i = i * 2) {
               // Checkout the commit
-              console.log(`git checkout HEAD~${i} && git rev-parse --short HEAD`)
-              const commit = execSync(`git checkout HEAD~${i} && git rev-parse --short HEAD`)
+              console.log(`cd Nim && git checkout HEAD~${i} && git rev-parse --short HEAD`)
+              const commit = execSync(`cd Nim && git checkout HEAD~${i} && git rev-parse --short HEAD`)
               console.log(commit)
             }
             // Break out of the for
