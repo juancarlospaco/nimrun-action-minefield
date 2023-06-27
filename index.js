@@ -285,7 +285,7 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
             // Git clone Nim repo to bisect commit by commit between devel and stable.
             console.log(execSync("CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update devel"))
             console.log(execSync("git clone https://github.com/nim-lang/Nim.git"))
-            console.log(execSync("cd Nim && ./build_all.sh"))
+            console.log(execSync("cd Nim && git checkout devel"))
             // console.log(execSync("cd Nim && nim c ./koch.nim"))
             // console.log(execSync("git clone https://github.com/nim-lang/Nim.git && cd Nim && ./build_all.sh && nim c ./koch.nim"))
 
