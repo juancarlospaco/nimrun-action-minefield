@@ -282,18 +282,30 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
             isStableOk = isOk
           }
           else if (!isDevelOk && isStableOk) {
-            // Git clone Nim repo to bisect commit by commit between devel and stable.
+            const folder = {cwd: "./Nim"}
+            // Force to start from devel
             console.log(execSync("CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update devel"))
+            // Git clone Nim repo and checkout devel
             console.log(execSync("git clone https://github.com/nim-lang/Nim.git"))
-            console.log(execSync("cd Nim && git checkout devel"))
+            console.log(execSync("git checkout devel", folder))
+
             // console.log(execSync("cd Nim && nim c ./koch.nim"))
             // console.log(execSync("git clone https://github.com/nim-lang/Nim.git && cd Nim && ./build_all.sh && nim c ./koch.nim"))
 
             for (let i = 1; i < 99; i = i * 2) {
               // Checkout the commit
-              console.log(`cd Nim && git checkout HEAD~${i} && git rev-parse --short HEAD`)
-              const commit = execSync(`cd Nim && git checkout HEAD~${i} && git rev-parse --short HEAD`)
-              console.log(commit)
+              console.log(execSync(`git checkout HEAD~${i}`, folder))
+              const commit = execSync("git rev-parse --short HEAD", folder).toString().trim()
+              const mesage = execSync("git log -1 --pretty='%B'", folder).toString().trim()
+              const user = execSync("git log -1 --pretty=format:'%an'", folder).toString().trim()
+              const date = execSync("git log -1 --pretty=format:'%ai'", folder).toString().trim()
+
+              console.log(`
+                shorthash ${commit}
+                message   ${mesage}
+                user      ${user}
+                datetime  ${date}
+              `)
             }
             // Break out of the for
             break
