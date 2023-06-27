@@ -289,6 +289,7 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
               console.log(`git checkout HEAD~${i} && git rev-parse --short HEAD`)
               const commit = execSync(`git checkout HEAD~${i} && git rev-parse --short HEAD`)
               console.log(commit)
+            }
           }
 
           // Append to reports
