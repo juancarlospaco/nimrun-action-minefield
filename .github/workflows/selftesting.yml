@@ -1,6 +1,7 @@
 name: "selftesting"
-on: push
-
+on:
+  issue_comment:
+    types: created
 
 jobs:
   test:
