@@ -264,6 +264,8 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
       // Add Reaction of "Eyes" as seen.
       if (addReaction(githubClient, "eyes")) {
         // Check the same code agaisnt all versions of Nim from devel to 1.0
+        let isDevelOk  = false
+        let isStableOk = false
         for (let semver of nimFinalVersions) {
           // Choosenim switch semver
           console.log(executeChoosenim(semver))
@@ -272,6 +274,23 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()  // performance.now()
           const thumbsUp = (isOk ? ":+1:" : ":-1:")
+
+          if (semver === "devel") {
+            isDevelOk = isOk
+          }
+          else if (semver === "stable") {
+            isStableOk = isOk
+          }
+          else if (!isDevelOk && isStableOk) {
+            // Git clone Nim repo to bisect commit by commit between devel and stable.
+            execSync("git clone https://github.com/nim-lang/Nim.git && cd Nim && ./build_all.sh && nim c ./koch.nim")
+            for (let i = 1; i < 999; i = i * 2) {
+              // Checkout the commit
+              console.log(`git checkout HEAD~${i} && git rev-parse --short HEAD`)
+              const commit = execSync(`git checkout HEAD~${i} && git rev-parse --short HEAD`)
+              console.log(commit)
+          }
+
           // Append to reports
           issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>
 
