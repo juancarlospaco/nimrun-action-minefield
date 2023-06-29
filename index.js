@@ -318,12 +318,10 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
             fails = semver
           }
           // Append to reports
-          issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>
-
+          issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
 ${output}
-${ tripleBackticks }
-`
+${ tripleBackticks }\n`
           // Iff Ok add meta info
           if (isOk) {
             issueCommentStr += `<h3>Stats</h3><ul>
@@ -333,20 +331,17 @@ ${ tripleBackticks }
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
 <li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
 <li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
-<h3>AST</h3>
-
+<h3>AST</h3>\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
 ${ tripleBackticks }
-
-<h3>IR</h3>
-
+\n<h3>IR</h3>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
-${ tripleBackticks }`
+${ tripleBackticks }\n`
           }
+          issueCommentStr += "</details>\n"
         }
-        issueCommentStr += "</details>"
 
 
         // This part is about finding the specific commit that breaks
@@ -354,7 +349,7 @@ ${ tripleBackticks }`
           // Get a range of commits between "WORKS..FAILS"
           const worksCommit = gitCommitForVersion(works)
           const failsCommit = gitCommitForVersion(fails)
-          console.log(`\nworksCommit =\t${worksCommit}\nfailsCommit =\t${failsCommit}\n`)
+          console.log(`\nfailsCommit =\t${failsCommit}\nworksCommit =\t${worksCommit}\n`)
           gitInit()
           let commits = gitCommitsBetween(worksCommit, failsCommit)
           // iff less than 10 items then we dont care
@@ -383,18 +378,17 @@ ${ tripleBackticks }`
             if (isOk) {
               const [user, mesage, date, files] = gitMetadata()
 
-              issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>
-
+              issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
 ${output}
 ${ tripleBackticks }
-
+\n\n
 shorthash ${semver}
 message   ${mesage}
 user      ${user}
 datetime  ${date}
 files     ${files}
-</details>`
+</details>\n`
               // Break out of the for
               break
             }
