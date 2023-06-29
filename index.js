@@ -367,7 +367,7 @@ ${ tripleBackticks }`
               commits = commits.slice(0, midIndex);
             // elif NOT OK then split mid..end
             } else {
-              commits = commits.slice(midIndex, commits.length);
+              commits = commits.slice(midIndex);
             }
           }
           console.log("COMMITS:\t", commits)
