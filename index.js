@@ -16,7 +16,7 @@ const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile} `
 const extraFlags       = " --run -d:strip -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --threads:off --verbosity:0 --hints:off --warnings:off --lineTrace:off" + preparedFlags
-const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0"]
+const nimFinalVersions = ["devel", "stable", "1.4.0"]
 
 
 const cfg = (key) => {
@@ -32,13 +32,6 @@ const indentString = (str, count, indent = ' ') => {
 }
 
 
-function isSemverOrDevel(version) {
-  const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
-  const s = version.trim().toLowerCase();
-  return (semverPattern.test(s) || s === 'devel' || s === 'stable');
-}
-
-
 function formatDuration(seconds) {
   function numberEnding(number) {
     return (number > 1) ? 's' : '';
@@ -49,11 +42,11 @@ function formatDuration(seconds) {
       const hours   = Math.floor(((seconds % 31536000) % 86400) / 3600);
       const minutes = Math.floor(((seconds % 31536000) % 86400) %  60);
       const second  = (((seconds % 31536000) % 86400)  % 3600)  % 0;
-      const r = (years > 0 )  ? years   + " year"   + numberEnding(years)   : "";
-      const x = (days > 0)    ? days    + " day"    + numberEnding(days)    : "";
-      const y = (hours > 0)   ? hours   + " hour"   + numberEnding(hours)   : "";
+      const r = (years   > 0) ? years   + " year"   + numberEnding(years)   : "";
+      const x = (days    > 0) ? days    + " day"    + numberEnding(days)    : "";
+      const y = (hours   > 0) ? hours   + " hour"   + numberEnding(hours)   : "";
       const z = (minutes > 0) ? minutes + " minute" + numberEnding(minutes) : "";
-      const u = (second > 0)  ? second  + " second" + numberEnding(second)  : "";
+      const u = (second  > 0) ? second  + " second" + numberEnding(second)  : "";
       return r + x + y + z + u
   } else {
     return "now"
@@ -81,11 +74,9 @@ function getFilesizeInBytes(filename) {
 
 
 function checkAuthorAssociation() {
-  const authorPerm = context.payload.comment.author_association.toLowerCase().trim()
-  if ( authorPerm === "owner" ) {
-    return true
-  }
-  if ( authorPerm === "collaborator" ) {
+  console.log("context.payload.comment=\t", context.payload.comment)
+  const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
+  if (authorPerm === "owner" || authorPerm === "collaborator") {
     return true
   }
   return false
@@ -108,7 +99,7 @@ async function checkCollaboratorPermissionLevel(githubClient, levels) {
 async function addReaction(githubClient, reaction) {
   return (await githubClient.reactions.createForIssueComment({
     comment_id: context.payload.comment.id,
-    content   : reaction.trim(),
+    content   : reaction.trim().toLowerCase(),
     owner     : context.repo.owner,
     repo      : context.repo.repo,
   }) !== undefined)
@@ -136,7 +127,7 @@ function parseGithubComment(comment) {
 
 
 function parseGithubCommand(comment) {
-  let result = comment.split("\n")[0].trim()
+  let result = comment.trim().split("\n")[0].trim()
   if (result.startsWith("@github-actions nim c") || result.startsWith("@github-actions nim cpp") || result.startsWith("@github-actions nim js") || result.startsWith("@github-actions nim e")) {
     if (result.startsWith("@github-actions nim js")) {
       result = result + " -d:nodejs "
@@ -155,13 +146,10 @@ function parseGithubCommand(comment) {
 
 
 function executeChoosenim(semver) {
-  // console.assert(isSemverOrDevel(semver) , "SemVer must be 'devel' or 'stable' or 'X.Y.Z'");
-  const cmd = "CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update "
-  // console.log("COMMAND:\t", `${cmd} ${semver}`)
   try {
-    return execSync(`${cmd} ${semver}`).toString().trim()
+    return execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`).toString().trim()
   } catch (error) {
-    core.setFailed(error)
+    console.warn(error)
     return ""
   }
 }
@@ -176,34 +164,18 @@ function executeNim(cmd, codes) {
   try {
     return [true, execSync(cmd).toString().trim()]
   } catch (error) {
-    // core.setFailed(error)
     console.warn(error)
     return [false, `${error}`]
   }
 }
 
 
-function executeGenDepend() {
-  // Generate a dependency graph in ASCII Art, because Github markdown dont support SVG.
-  // If this fails because missing graph-easy, then it returns empty string.
-  try {
-    execSync(`nim genDepend --verbosity:0 --hints:off --warnings:off --colors:off ${ temporaryFile }`)
-    return execSync(`graph-easy ${ temporaryFile.replace(".nim", ".dot") }`).toString()
-  } catch (error) {
-    console.warn(error)
-    console.warn("sudo apt-get install -q -y graphviz libgraph-easy-perl")
-    return ""
-  }
-}
-
-
 function executeAstGen(codes) {
-  const cmd2 = "nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --import:std/macros "
   fs.writeFileSync(temporaryFile2, "dumpAstGen:\n" + indentString(codes, 2))
   try {
-    return execSync(cmd2 + temporaryFile2).toString().trim()
+    return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --import:std/macros ${temporaryFile2}`).toString().trim()
   } catch (error) {
-    core.setFailed(error)
+    console.warn(error)
     return ""
   }
 }
@@ -230,26 +202,6 @@ function getIR() {
 }
 
 
-// Too verbose, can exceed maximum message len for comments and --asm wont work on old Nim versions.
-function getAsm() {
-  if (fs.existsSync(temporaryFileAsm + ".asm")) {
-    return fs.readFileSync(temporaryFileAsm + ".asm").toString().trim()
-  }
-  if (fs.existsSync(temporaryFileAsm + "pp.asm")) {
-    return fs.readFileSync(temporaryFileAsm + "pp.asm").toString().trim()
-  }
-  return ""
-}
-
-
-// function gitCheckout(distanceToHead) {
-//   // Git checkout HEAD~distanceToHead and return current commit short hash
-//   console.assert(distanceToHead > 0)
-//   console.log(execSync(`git checkout HEAD~${distanceToHead}`, {cwd: gitTempPath}))
-//   return execSync("git rev-parse --short HEAD", {cwd: gitTempPath}).toString().trim()
-// }
-
-
 function gitInit() {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
@@ -259,11 +211,12 @@ function gitInit() {
 }
 
 
-function gitMetadata() {
+function gitMetadata(commit) {
   // Git get useful metadata from current commit
+  execSync(`git checkout ${commit}`, {cwd: gitTempPath})
   const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim()
   const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim()
-  const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim()
+  const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim().toLowerCase()
   const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim()
   return [user, mesage, date, files]
 }
@@ -346,9 +299,9 @@ ${ tripleBackticks }\n`
 
         // This part is about finding the specific commit that breaks
         if (works !== null && fails !== null) {
-          // Get a range of commits between "WORKS..FAILS"
-          const worksCommit = gitCommitForVersion(works)
+          // Get a range of commits between "FAILS..WORKS"
           const failsCommit = gitCommitForVersion(fails)
+          const worksCommit = gitCommitForVersion(works)
           console.log(`\nfailsCommit =\t${failsCommit}\nworksCommit =\t${worksCommit}\n`)
           gitInit()
           let commits = gitCommitsBetween(worksCommit, failsCommit)
@@ -357,18 +310,19 @@ ${ tripleBackticks }\n`
             let midIndex = Math.ceil(commits.length / 2)
             console.log(executeChoosenim(commits[midIndex]))
             let [isOk, output] = executeNim(cmd, codes)
-            // iff its OK then split 0..mid
             if (isOk) {
+              // iff its OK then split 0..mid
               commits = commits.slice(0, midIndex);
-            // elif NOT OK then split mid..end
             } else {
+              // else NOT OK then split mid..end
               commits = commits.slice(midIndex);
             }
           }
           console.log("COMMITS:\t", commits)
-          for (let semver of commits) {
+          let index = 0
+          for (let commit of commits) {
             // Choosenim switch semver
-            console.log(executeChoosenim(semver))
+            console.log(executeChoosenim(commit))
             // Run code
             const started  = new Date()  // performance.now()
             const [isOk, output] = executeNim(cmd, codes)
@@ -376,22 +330,23 @@ ${ tripleBackticks }\n`
             const thumbsUp = (isOk ? ":+1:" : ":-1:")
 
             if (isOk) {
-              const [user, mesage, date, files] = gitMetadata()
+              const [user, mesage, date, files] = gitMetadata(commits[index - 1])
 
-              issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>\n
+              issueCommentStr += `<details><summary>${commit}\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
 ${output}
 ${ tripleBackticks }
-\n\n
-shorthash ${semver}
-message   ${mesage}
-user      ${user}
-datetime  ${date}
-files     ${files}
+\n<h3>Diagnostics</h3>
+- shorthash ${commit}
+- message   ${mesage}
+- user      ${user}
+- datetime  ${date}
+- files     ${files}
 </details>\n`
               // Break out of the for
               break
             }
+            index++
           }
         // Report results back as a comment on the issue.
         addIssueComment(githubClient, issueCommentStr)
@@ -400,10 +355,3 @@ files     ${files}
     }
   }
 }
-
-/*
-<h3>Deps</h3>
-${ tripleBackticks }
-${ executeGenDepend() }
-${ tripleBackticks }
-*/
