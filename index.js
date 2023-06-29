@@ -278,13 +278,10 @@ function gitCommitsBetween(commitOld, commitNew) {
 function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
   execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`)
-  let nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '')
+  const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '')
   for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
-      console.log("11111111111111111111111111111111")
-      console.log('s.replace("git hash:")', s.replace("git hash:"))
-      console.log("11111111111111111111111111111111")
-      return s.replace("git hash:").trim()
+      return s.replace("git hash:", "").trim()
     }
   }
 }
@@ -355,10 +352,6 @@ ${ tripleBackticks }`
         // This part is about finding the specific commit that breaks
         if (works !== null && fails !== null) {
           // Get a range of commits between "WORKS..FAILS"
-          console.log("################################")
-          console.log("works=", works)
-          console.log("fails=", fails)
-          console.log("################################")
           const worksCommit = gitCommitForVersion(works)
           const failsCommit = gitCommitForVersion(fails)
           console.log("################################")
