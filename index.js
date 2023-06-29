@@ -353,6 +353,10 @@ ${ tripleBackticks }`
           // Get a range of commits between "WORKS..FAILS"
           const worksCommit = gitCommitForVersion(works)
           const failsCommit = gitCommitForVersion(fails)
+          console.log("################################")
+          console.log("worksCommit=", worksCommit)
+          console.log("failsCommit=", failsCommit)
+          console.log("################################")
           gitInit()
           const commits = gitCommitsBetween(worksCommit, failsCommit)
           console.log("COMMITS:\t", commits)
