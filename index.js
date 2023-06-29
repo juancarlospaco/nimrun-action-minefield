@@ -9,20 +9,14 @@ const {context, GitHub} = require('@actions/github')
 
 
 const tripleBackticks  = "```"
+const gitTempPath      = `${ process.cwd() }/Nim`
 const temporaryFile    = `${ process.cwd() }/temp.nim`
 const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile} `
 const extraFlags       = " --run -d:strip -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --threads:off --verbosity:0 --hints:off --warnings:off --lineTrace:off" + preparedFlags
-// const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0"]
-const nimFinalVersions = [
-  "devel", "stable",
-  "1.6.10", "1.6.4", "1.6.0",
-  "1.4.8",  "1.4.4", "1.4.0",
-  "1.2.18", "1.2.10", "1.2.0",
-  "1.0.10", "1.0.4", "1.0.0",
-]
+const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0"]
 
 
 const cfg = (key) => {
@@ -248,6 +242,48 @@ function getAsm() {
 }
 
 
+// function gitCheckout(distanceToHead) {
+//   // Git checkout HEAD~distanceToHead and return current commit short hash
+//   console.assert(distanceToHead > 0)
+//   console.log(execSync(`git checkout HEAD~${distanceToHead}`, {cwd: gitTempPath}))
+//   return execSync("git rev-parse --short HEAD", {cwd: gitTempPath}).toString().trim()
+// }
+
+
+function gitInit() {
+  // Git clone Nim repo and checkout devel
+  console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`))
+  console.log(execSync("git checkout devel", {cwd: gitTempPath}))
+}
+
+
+function gitMetadata() {
+  // Git get useful metadata from current commit
+  const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim()
+  const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim()
+  const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim()
+  const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim()
+  return [user, mesage, date, files]
+}
+
+
+function gitCommitsBetween(commitOld, commitNew) {
+  // Git get all commit short hash between commitOld and commitNew
+  return execSync(`git log --pretty=format:'"#%h"' ${commitOld}..${commitNew}`, {cwd: gitTempPath}).toString().trim().toLowerCase().split('\n')
+}
+
+
+function gitCommitForVersion(semver) {
+  // Get Git commit for an specific Nim semver
+  execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`)
+  for (const s of execSync("nim --version").toString().trim().toLowerCase().split('\n')) {
+    if (s.startsWith("git hash:")) {
+      return s.replace("git hash:").trim()
+    }
+  }
+}
+
+
 // Only run if this is an "issue_comment" and checkAuthorAssociation.
 if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
   const githubToken   = cfg('github-token')
@@ -264,53 +300,20 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
       // Add Reaction of "Eyes" as seen.
       if (addReaction(githubClient, "eyes")) {
         // Check the same code agaisnt all versions of Nim from devel to 1.0
-        let isDevelOk  = false
-        let isStableOk = false
+        let fails = null
+        let works = null
         for (let semver of nimFinalVersions) {
-          // Choosenim switch semver
           console.log(executeChoosenim(semver))
-          // Run code
           const started  = new Date()  // performance.now()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()  // performance.now()
           const thumbsUp = (isOk ? ":+1:" : ":-1:")
-
-          if (semver === "devel") {
-            isDevelOk = isOk
+          if (isOk && works === null) {
+            works = semver
           }
-          else if (semver === "stable") {
-            isStableOk = isOk
+          else if (!isOk && fails === null) {
+            fails = semver
           }
-          else if (!isDevelOk && isStableOk) {
-            const folder = {cwd: "./Nim"}
-            // Force to start from devel
-            console.log(execSync("CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update devel"))
-            // Git clone Nim repo and checkout devel
-            console.log(execSync("git clone https://github.com/nim-lang/Nim.git"))
-            console.log(execSync("git checkout devel", folder))
-
-            // console.log(execSync("cd Nim && nim c ./koch.nim"))
-            // console.log(execSync("git clone https://github.com/nim-lang/Nim.git && cd Nim && ./build_all.sh && nim c ./koch.nim"))
-
-            for (let i = 1; i < 99; i = i * 2) {
-              // Checkout the commit
-              console.log(execSync(`git checkout HEAD~${i}`, folder))
-              const commit = execSync("git rev-parse --short HEAD", folder).toString().trim()
-              const mesage = execSync("git log -1 --pretty='%B'", folder).toString().trim()
-              const user = execSync("git log -1 --pretty=format:'%an'", folder).toString().trim()
-              const date = execSync("git log -1 --pretty=format:'%ai'", folder).toString().trim()
-
-              console.log(`
-                shorthash ${commit}
-                message   ${mesage}
-                user      ${user}
-                datetime  ${date}
-              `)
-            }
-            // Break out of the for
-            break
-          }
-
           // Append to reports
           issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>
 
@@ -337,18 +340,56 @@ ${ tripleBackticks }
 
 ${ tripleBackticks }cpp
 ${ getIR() }
-${ tripleBackticks }
-`
+${ tripleBackticks }`
           }
-          issueCommentStr += "</details>"
+        }
+        issueCommentStr += "</details>"
+
+
+        // This part is about finding the specific commit that breaks
+        if (works !== null && fails !== null) {
+          // Get a range of commits between "WORKS..FAILS"
+          const worksCommit = gitCommitForVersion(works)
+          const failsCommit = gitCommitForVersion(fails)
+          initGit()
+          const commits = gitCommitsBetween(worksCommit, failsCommit)
+          console.log("COMMITS:\t", commits)
+          for (let semver of commits) {
+            // Choosenim switch semver
+            console.log(executeChoosenim(semver))
+            // Run code
+            const started  = new Date()  // performance.now()
+            const [isOk, output] = executeNim(cmd, codes)
+            const finished = new Date()  // performance.now()
+            const thumbsUp = (isOk ? ":+1:" : ":-1:")
+
+            if (isOk) {
+              gitInit()
+              const [user, mesage, date, files] = gitMetadata()
+
+              issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>
+
+${ tripleBackticks }
+${output}
+${ tripleBackticks }
+
+shorthash ${semver}
+message   ${mesage}
+user      ${user}
+datetime  ${date}
+files     ${files}
+</details>`
+              // Break out of the for
+              break
+            }
         }
         // Report results back as a comment on the issue.
         addIssueComment(githubClient, issueCommentStr)
+        }
       }
     }
   }
 }
-
 
 /*
 <h3>Deps</h3>
