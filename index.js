@@ -362,8 +362,12 @@ ${ tripleBackticks }`
             let midIndex = Math.ceil(commits.length / 2)
             console.log(executeChoosenim(commits[midIndex]))
             let [isOk, output] = executeNim(cmd, codes)
+            // iff its OK then split 0..mid
             if (isOk) {
               commits = commits.slice(0, midIndex);
+            // elif NOT OK then split mid..end
+            } else {
+              commits = commits.slice(midIndex, commits.length);
             }
           }
           console.log("COMMITS:\t", commits)
