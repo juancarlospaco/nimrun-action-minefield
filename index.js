@@ -252,8 +252,10 @@ function getAsm() {
 
 function gitInit() {
   // Git clone Nim repo and checkout devel
-  console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`))
-  console.log(execSync("git checkout devel", {cwd: gitTempPath}))
+  if (!fs.existsSync(gitTempPath)) {
+    console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`))
+    console.log(execSync("git checkout devel", {cwd: gitTempPath}))
+  }
 }
 
 
@@ -351,7 +353,7 @@ ${ tripleBackticks }`
           // Get a range of commits between "WORKS..FAILS"
           const worksCommit = gitCommitForVersion(works)
           const failsCommit = gitCommitForVersion(fails)
-          initGit()
+          gitInit()
           const commits = gitCommitsBetween(worksCommit, failsCommit)
           console.log("COMMITS:\t", commits)
           for (let semver of commits) {
@@ -364,7 +366,6 @@ ${ tripleBackticks }`
             const thumbsUp = (isOk ? ":+1:" : ":-1:")
 
             if (isOk) {
-              gitInit()
               const [user, mesage, date, files] = gitMetadata()
 
               issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>
