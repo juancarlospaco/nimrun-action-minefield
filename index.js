@@ -155,7 +155,7 @@ function parseGithubCommand(comment) {
 
 
 function executeChoosenim(semver) {
-  console.assert(isSemverOrDevel(semver) , "SemVer must be 'devel' or 'stable' or 'X.Y.Z'");
+  // console.assert(isSemverOrDevel(semver) , "SemVer must be 'devel' or 'stable' or 'X.Y.Z'");
   const cmd = "CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update "
   // console.log("COMMAND:\t", `${cmd} ${semver}`)
   try {
@@ -354,12 +354,18 @@ ${ tripleBackticks }`
           // Get a range of commits between "WORKS..FAILS"
           const worksCommit = gitCommitForVersion(works)
           const failsCommit = gitCommitForVersion(fails)
-          console.log("################################")
-          console.log("worksCommit=", worksCommit)
-          console.log("failsCommit=", failsCommit)
-          console.log("################################")
+          console.log(`\nworksCommit =\t${worksCommit}\nfailsCommit =\t${failsCommit}\n`)
           gitInit()
-          const commits = gitCommitsBetween(worksCommit, failsCommit)
+          let commits = gitCommitsBetween(worksCommit, failsCommit)
+          // iff less than 10 items then we dont care
+          while (commits.length > 10) {
+            let midIndex = Math.ceil(commits.length / 2)
+            console.log(executeChoosenim(commits[midIndex]))
+            let [isOk, output] = executeNim(cmd, codes)
+            if (isOk) {
+              commits = commits.slice(0, midIndex);
+            }
+          }
           console.log("COMMITS:\t", commits)
           for (let semver of commits) {
             // Choosenim switch semver
@@ -388,7 +394,7 @@ files     ${files}
               // Break out of the for
               break
             }
-        }
+          }
         // Report results back as a comment on the issue.
         addIssueComment(githubClient, issueCommentStr)
         }
