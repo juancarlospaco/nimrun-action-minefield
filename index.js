@@ -282,7 +282,7 @@ function gitCommitForVersion(semver) {
   for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
       console.log("11111111111111111111111111111111")
-      console.log('s.replace("git hash:").trim()', s.replace("git hash:").trim())
+      console.log('s.replace("git hash:")', s.replace("git hash:"))
       console.log("11111111111111111111111111111111")
       return s.replace("git hash:").trim()
     }
