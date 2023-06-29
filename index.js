@@ -351,6 +351,10 @@ ${ tripleBackticks }`
         // This part is about finding the specific commit that breaks
         if (works !== null && fails !== null) {
           // Get a range of commits between "WORKS..FAILS"
+          console.log("################################")
+          console.log("works=", works)
+          console.log("fails=", fails)
+          console.log("################################")
           const worksCommit = gitCommitForVersion(works)
           const failsCommit = gitCommitForVersion(fails)
           console.log("################################")
