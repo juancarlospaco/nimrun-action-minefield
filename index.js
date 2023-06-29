@@ -279,15 +279,11 @@ function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
   execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`)
   let nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '')
-  console.log("00000000000000000000000000000000")
-  console.log("result=", nimversion)
-  console.log("00000000000000000000000000000000")
   for (const s of nimversion) {
-    console.log("11111111111111111111111111111111")
-    console.log("s=", s)
-    console.log("s.startsWith('git hash:')=", s.startsWith("git hash:"))
-    console.log("11111111111111111111111111111111")
     if (s.startsWith("git hash:")) {
+      console.log("11111111111111111111111111111111")
+      console.log('s.replace("git hash:").trim()', s.replace("git hash:").trim())
+      console.log("11111111111111111111111111111111")
       return s.replace("git hash:").trim()
     }
   }
