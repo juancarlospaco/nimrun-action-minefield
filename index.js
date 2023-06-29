@@ -278,7 +278,11 @@ function gitCommitsBetween(commitOld, commitNew) {
 function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
   execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`)
-  for (const s of execSync("nim --version").toString().trim().toLowerCase().split('\n')) {
+  const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n')
+  console.log("00000000000000000000000000000000")
+  console.log("nimversion=", nimversion)
+  console.log("00000000000000000000000000000000")
+  for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
       return s.replace("git hash:").trim()
     }
