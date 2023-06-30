@@ -360,9 +360,10 @@ ${ tripleBackticks }\n`
               const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
               console.log("breakingCommit =\t", breakingCommit)
               const [user, mesage, date, files] = gitMetadata(breakingCommit)
+              const comit = breakingCommit.replace('"', '').trim()
               // Report the breaking commit diagnostics
-              issueCommentStr += `<details><summary>${commit}\t:bug:</summary><h3>Diagnostics</h3>\n
-${user} on ${date} introduced a bug :bug: on commit [${commit}](https://github.com/nim-lang/Nim/commit/${commit}) with the message:\n
+              issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
+${user} on <code>${date}</code> introduced a bug :bug: on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with the message:\n
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
