@@ -233,7 +233,7 @@ function gitInit() {
 function gitMetadata(commit) {
   // Git get useful metadata from current commit
   console.assert(typeof commit === "string", `commit must be string, but got ${ typeof commit }`)
-  execSync(`git checkout ${commit}`, {cwd: gitTempPath})
+  execSync(`git checkout ${ commit.replace("#", "") }`, {cwd: gitTempPath})
   const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim()
   const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim()
   const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim().toLowerCase()
