@@ -153,7 +153,7 @@ function parseGithubCommand(comment) {
 
 function executeChoosenim(semver) {
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 5; i++) {
     try {
       const result = execSync(`choosenim --noColor --yes update ${semver}`, choosenimNoAnal).toString().trim()
       if (result) {
@@ -161,8 +161,8 @@ function executeChoosenim(semver) {
       }
     } catch (error) {
       console.warn(error)
-      if (i === 8) {
-        console.warn('choosenim failed 9 times')
+      if (i === 4) {
+        console.warn('choosenim failed 5 times')
         return ""
       }
     }
@@ -224,8 +224,8 @@ function getIR() {
 function gitInit() {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
-    console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`))
-    console.log(execSync("git checkout devel", {cwd: gitTempPath}))
+    console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`).toString())
+    console.log(execSync("git checkout devel", {cwd: gitTempPath}).toString())
   }
 }
 
@@ -233,7 +233,7 @@ function gitInit() {
 function gitMetadata(commit) {
   // Git get useful metadata from current commit
   console.assert(typeof commit === "string", `commit must be string, but got ${ typeof commit }`)
-  execSync(`git checkout ${ commit.replace("#", "") }`, {cwd: gitTempPath})
+  console.log(execSync(`git checkout ${ commit.replace("#", "") }`, {cwd: gitTempPath}).toString())
   const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim()
   const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim()
   const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim().toLowerCase()
@@ -373,12 +373,15 @@ ${ tripleBackticks }
 <li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
 <li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
 <h3>Diagnostics</h3>
-- shorthash ${commit}
-- message   ${mesage}
-- user      ${user}
-- datetime  ${date}
-- files     ${files}
-</details>\n`
+${user} on ${date} introduced a Bug :bug: on commit ${commit} with the message:\n
+${ tripleBackticks }
+${mesage}
+${ tripleBackticks }
+\nThe Bug is somewhere in these files:\n
+${ tripleBackticks }
+${files}
+${ tripleBackticks }
+\n</details>\n`
               // Break out of the for
               break
             }
