@@ -373,7 +373,7 @@ ${ tripleBackticks }
 <li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
 <li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
 <h3>Diagnostics</h3>
-${user} on ${date} introduced a Bug :bug: on commit ${commit} with the message:\n
+${user} on ${date} introduced a Bug :bug: on commit [${commit}](https://github.com/nim-lang/Nim/commit/${commit}) with the message:\n
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
@@ -381,6 +381,7 @@ ${ tripleBackticks }
 ${ tripleBackticks }
 ${files}
 ${ tripleBackticks }
+(According to the bug repro code sample and Git bisect)
 \n</details>\n`
               // Break out of the for
               break
