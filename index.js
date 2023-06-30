@@ -20,9 +20,9 @@ const nimFinalVersions = ["devel", "stable", "1.4.0"]
 
 
 const cfg = (key) => {
-  console.assert(key.length > 0);
-  const result = core.getInput(key, {required: true}).trim();
-  console.assert(result.length > 0);
+  console.assert(typeof seconds === "string")
+  const result = core.getInput(key, {required: true}).trim()
+  console.assert(typeof result === "string")
   return result;
 };
 
@@ -33,9 +33,11 @@ const indentString = (str, count, indent = ' ') => {
 
 
 function formatDuration(seconds) {
+  console.assert(typeof seconds === "number")
   function numberEnding(number) {
     return (number > 1) ? 's' : '';
   }
+  let result = "now"
   if (seconds > 0) {
       const years   = Math.floor(seconds   / 31536000);
       const days    = Math.floor((seconds  % 31536000) / 86400);
@@ -47,14 +49,15 @@ function formatDuration(seconds) {
       const y = (hours   > 0) ? hours   + " hour"   + numberEnding(hours)   : "";
       const z = (minutes > 0) ? minutes + " minute" + numberEnding(minutes) : "";
       const u = (second  > 0) ? second  + " second" + numberEnding(second)  : "";
-      return r + x + y + z + u
-  } else {
-    return "now"
+      result = r + x + y + z + u
   }
+  console.assert(typeof result === "string")
+  return result
 }
 
 
 function formatSizeUnits(bytes) {
+  console.assert(typeof bytes === "number")
   if      (bytes >= 1073741824) { bytes = (bytes / 1073741824).toFixed(2) + " Gb"; }
   else if (bytes >= 1048576)    { bytes = (bytes / 1048576).toFixed(2) + " Mb"; }
   else if (bytes >= 1024)       { bytes = (bytes / 1024).toFixed(2) + " Kb"; }
@@ -66,13 +69,18 @@ function formatSizeUnits(bytes) {
 
 
 function getFilesizeInBytes(filename) {
-  return (fs.existsSync(filename)) ? fs.statSync(filename).size : 0
+  console.assert(typeof filename === "string")
+  let result = (fs.existsSync(filename)) ? fs.statSync(filename).size : 0
+  console.assert(typeof result === "number")
+  return result
 }
 
 
 function checkAuthorAssociation() {
   const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
-  return (authorPerm === "owner" || authorPerm === "collaborator" || context.payload.comment.user.login === "juancarlospaco")
+  let result = (authorPerm === "owner" || authorPerm === "collaborator" || context.payload.comment.user.login === "juancarlospaco")
+  console.assert(typeof result === "boolean")
+  return result
 };
 
 
@@ -90,6 +98,7 @@ async function checkCollaboratorPermissionLevel(githubClient, levels) {
 
 
 async function addReaction(githubClient, reaction) {
+  console.assert(typeof reaction === "string")
   return (await githubClient.reactions.createForIssueComment({
     comment_id: context.payload.comment.id,
     content   : reaction.trim().toLowerCase(),
@@ -100,6 +109,7 @@ async function addReaction(githubClient, reaction) {
 
 
 async function addIssueComment(githubClient, issueCommentBody) {
+  console.assert(typeof issueCommentBody === "string")
   return (await githubClient.issues.createComment({
     issue_number: context.issue.number,
     owner       : context.repo.owner,
@@ -110,16 +120,21 @@ async function addIssueComment(githubClient, issueCommentBody) {
 
 
 function parseGithubComment(comment) {
+  console.assert(typeof comment === "string")
   const tokens = marked.Lexer.lex(comment)
+  let result = ""
   for (const token of tokens) {
     if (token.type === 'code' && token.lang === 'nim' && token.text.length > 0) {
-      return token.text.trim()
+      result = token.text.trim()
+      console.assert(typeof result === "string")
+      return result
     }
   }
 };
 
 
 function parseGithubCommand(comment) {
+  console.assert(typeof comment === "string")
   let result = comment.trim().split("\n")[0].trim()
   if (result.startsWith("@github-actions nim c") || result.startsWith("@github-actions nim cpp") || result.startsWith("@github-actions nim js") || result.startsWith("@github-actions nim e")) {
     if (result.startsWith("@github-actions nim js")) {
@@ -127,6 +142,7 @@ function parseGithubCommand(comment) {
     }
     result = result.replace("@github-actions", "")
     result = result + extraFlags
+    console.assert(typeof result === "string")
     return result.trim()
   } else {
     core.setFailed("Github comment must start with '@github-actions nim c' or '@github-actions nim cpp' or '@github-actions nim js'")
@@ -135,16 +151,27 @@ function parseGithubCommand(comment) {
 
 
 function executeChoosenim(semver) {
-  try {
-    return execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`).toString().trim()
-  } catch (error) {
-    console.warn(error)
-    return ""
+  console.assert(typeof semver === "string")
+  for (let i = 0; i < 9; i++) {
+    try {
+      const result = execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`).toString().trim()
+      if (result) {
+        return result
+      }
+    } catch (error) {
+      console.warn(error)
+      if (i === 8) {
+        console.warn('choosenim failed 9 times')
+        return ""
+      }
+    }
   }
 }
 
 
 function executeNim(cmd, codes) {
+  console.assert(typeof cmd === "string")
+  console.assert(typeof codes === "string")
   if (!fs.existsSync(temporaryFile)) {
     fs.writeFileSync(temporaryFile, codes)
     fs.chmodSync(temporaryFile, "444")
@@ -160,6 +187,7 @@ function executeNim(cmd, codes) {
 
 
 function executeAstGen(codes) {
+  console.assert(typeof codes === "string")
   fs.writeFileSync(temporaryFile2, "dumpAstGen:\n" + indentString(codes, 2))
   try {
     return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --import:std/macros ${temporaryFile2}`).toString().trim()
@@ -187,6 +215,7 @@ function getIR() {
   // Clean outs
   result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
   result = result.replace(/\/\*[\s\S]*?\*\//g, '')                          // Remove comments
+  console.assert(typeof result === "string")
   return result
 }
 
@@ -202,6 +231,7 @@ function gitInit() {
 
 function gitMetadata(commit) {
   // Git get useful metadata from current commit
+  console.assert(typeof commit === "string")
   execSync(`git checkout ${commit}`, {cwd: gitTempPath})
   const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim()
   const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim()
@@ -213,17 +243,24 @@ function gitMetadata(commit) {
 
 function gitCommitsBetween(commitOld, commitNew) {
   // Git get all commit short hash between commitOld and commitNew
-  return execSync(`git log --pretty=format:'"#%h"' ${commitOld}..${commitNew}`, {cwd: gitTempPath}).toString().trim().toLowerCase().split('\n')
+  console.assert(typeof commitOld === "string")
+  console.assert(typeof commitNew === "string")
+  const output = execSync(`git log --pretty=format:'"#%h"' ${commitOld}..${commitNew}`, {cwd: gitTempPath}).toString().trim().toLowerCase()
+  console.assert(typeof output === "string")
+  return output.split('\n')
 }
 
 
 function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
-  execSync(`CHOOSENIM_NO_ANALYTICS=1 choosenim --noColor --skipClean --yes update ${semver}`)
+  console.assert(typeof semver === "string")
+  executeChoosenim(semver)
   const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '')
   for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
-      return s.replace("git hash:", "").trim()
+      let result = s.replace("git hash:", "").trim().toLowerCase()
+      console.assert(typeof result === "string")
+      return result
     }
   }
 }
