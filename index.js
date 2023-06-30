@@ -66,20 +66,13 @@ function formatSizeUnits(bytes) {
 
 
 function getFilesizeInBytes(filename) {
-  if (fs.existsSync(filename)) {
-    return fs.statSync(filename).size
-  }
-  return 0
+  return (fs.existsSync(filename)) ? fs.statSync(filename).size : 0
 }
 
 
 function checkAuthorAssociation() {
-  console.log("context.payload.comment=\t", context.payload.comment)
   const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
-  if (authorPerm === "owner" || authorPerm === "collaborator") {
-    return true
-  }
-  return false
+  return (authorPerm === "owner" || authorPerm === "collaborator" || context.payload.comment.user.login === "juancarlospaco")
 };
 
 
@@ -132,12 +125,8 @@ function parseGithubCommand(comment) {
     if (result.startsWith("@github-actions nim js")) {
       result = result + " -d:nodejs "
     }
-    // if (result.startsWith("@github-actions nim c") || result.startsWith("@github-actions nim cpp")) {
-    //   result = result + " --asm --passC:-fno-verbose-asm "
-    // }
     result = result.replace("@github-actions", "")
     result = result + extraFlags
-    // result = "time " + result
     return result.trim()
   } else {
     core.setFailed("Github comment must start with '@github-actions nim c' or '@github-actions nim cpp' or '@github-actions nim js'")
@@ -255,15 +244,16 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
       const cmd   = parseGithubCommand(githubComment)
       // Add Reaction of "Eyes" as seen.
       if (addReaction(githubClient, "eyes")) {
-        // Check the same code agaisnt all versions of Nim from devel to 1.0
         let fails = null
         let works = null
+        // Check the same code agaisnt all versions of Nim from devel to 1.0
         for (let semver of nimFinalVersions) {
           console.log(executeChoosenim(semver))
           const started  = new Date()  // performance.now()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()  // performance.now()
           const thumbsUp = (isOk ? ":+1:" : ":-1:")
+          // Remember which version works and which version breaks
           if (isOk && works === null) {
             works = semver
           }
@@ -302,10 +292,10 @@ ${ tripleBackticks }\n`
           // Get a range of commits between "FAILS..WORKS"
           const failsCommit = gitCommitForVersion(fails)
           const worksCommit = gitCommitForVersion(works)
-          console.log(`\nfailsCommit =\t${failsCommit}\nworksCommit =\t${worksCommit}\n`)
           gitInit()
           let commits = gitCommitsBetween(worksCommit, failsCommit)
-          // iff less than 10 items then we dont care
+          // Split commits in half and check if that commit works or fails,
+          // then repeat the split there until we got less than 10 commits.
           while (commits.length > 10) {
             let midIndex = Math.ceil(commits.length / 2)
             console.log(executeChoosenim(commits[midIndex]))
@@ -327,16 +317,24 @@ ${ tripleBackticks }\n`
             const started  = new Date()  // performance.now()
             const [isOk, output] = executeNim(cmd, codes)
             const finished = new Date()  // performance.now()
-            const thumbsUp = (isOk ? ":+1:" : ":-1:")
-
+            // if this commit works, then previous commit is the breakingCommit
             if (isOk) {
-              const [user, mesage, date, files] = gitMetadata(commits[index - 1])
-
-              issueCommentStr += `<details><summary>${commit}\t${thumbsUp}</summary><h3>Output</h3>\n
+              const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
+              console.log("breakingCommit =\t", breakingCommit)
+              const [user, mesage, date, files] = gitMetadata(breakingCommit)
+              // Report the breaking commit diagnostics
+              issueCommentStr += `<details><summary>${commit}\t:bug:</summary><h3>Output</h3>\n
 ${ tripleBackticks }
 ${output}
 ${ tripleBackticks }
-\n<h3>Diagnostics</h3>
+<h3>Stats</h3><ul>
+<li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
+<li><b>Started </b>\t<code>${ started.toISOString().split('.').shift()  }</code>
+<li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
+<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
+<li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
+<li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
+<h3>Diagnostics</h3>
 - shorthash ${commit}
 - message   ${mesage}
 - user      ${user}
