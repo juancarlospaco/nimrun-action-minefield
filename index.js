@@ -21,7 +21,7 @@ const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
 
 
 const cfg = (key) => {
-  console.assert(typeof seconds === "string", `key must be string, but got ${ typeof key }`)
+  console.assert(typeof key === "string", `key must be string, but got ${ typeof key }`)
   const result = core.getInput(key, {required: true}).trim()
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result;
@@ -34,7 +34,7 @@ const indentString = (str, count, indent = ' ') => {
 
 
 function formatDuration(seconds) {
-  console.assert(typeof seconds === "number", `seconds must be number, but got ${ typeof seconds }`)
+  console.assert(typeof seconds === "number", `seconds must be number, but got ${ typeof seconds }\t"${ seconds }"`)
   function numberEnding(number) {
     return (number > 1) ? 's' : '';
   }
@@ -155,7 +155,7 @@ function executeChoosenim(semver) {
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   for (let i = 0; i < 9; i++) {
     try {
-      const result = execSync(`choosenim --noColor --skipClean --yes update ${semver}`, choosenimNoAnal).toString().trim()
+      const result = execSync(`choosenim --noColor --yes update ${semver}`, choosenimNoAnal).toString().trim()
       if (result) {
         return result
       }
