@@ -8,6 +8,7 @@ const { execSync } = require('child_process');
 const {context, GitHub} = require('@actions/github')
 
 
+const startedDatetime  = new Date()  // performance.now()
 const tripleBackticks  = "```"
 const gitTempPath      = `${ process.cwd() }/Nim`
 const temporaryFile    = `${ process.cwd() }/temp.nim`
@@ -34,7 +35,7 @@ const indentString = (str, count, indent = ' ') => {
 
 
 function formatDuration(seconds) {
-  console.assert(typeof seconds === "number", `seconds must be number, but got ${ typeof seconds }\t"${ seconds }"`)
+  console.assert(typeof seconds === "number", `seconds must be number, but got ${ typeof seconds }`)
   function numberEnding(number) {
     return (number > 1) ? 's' : '';
   }
@@ -155,14 +156,14 @@ function executeChoosenim(semver) {
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   for (let i = 0; i < 5; i++) {
     try {
-      const result = execSync(`choosenim --noColor --yes update ${semver}`, choosenimNoAnal).toString().trim()
+      const result = execSync(`choosenim --noColor --skipClean --yes update "${semver}"`, choosenimNoAnal).toString().trim()
       if (result) {
         return result
       }
     } catch (error) {
       console.warn(error)
       if (i === 4) {
-        console.warn('choosenim failed 5 times')
+        console.warn('choosenim failed 5 times, giving up...')
         return ""
       }
     }
@@ -246,7 +247,7 @@ function gitCommitsBetween(commitOld, commitNew) {
   // Git get all commit short hash between commitOld and commitNew
   console.assert(typeof commitOld === "string", `commitOld must be string, but got ${ typeof commitOld }`)
   console.assert(typeof commitNew === "string", `commitNew must be string, but got ${ typeof commitNew }`)
-  const result = execSync(`git log --pretty=format:'"#%h"' ${commitOld}..${commitNew}`, {cwd: gitTempPath}).toString().trim().toLowerCase()
+  const result = execSync(`git log --pretty=format:'#%h' ${commitOld}..${commitNew}`, {cwd: gitTempPath}).toString().trim().toLowerCase()
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result.split('\n')
 }
@@ -346,7 +347,6 @@ ${ tripleBackticks }\n`
               commits = commits.slice(midIndex);
             }
           }
-          console.log("COMMITS:\t", commits)
           let index = 0
           for (let commit of commits) {
             // Choosenim switch semver
@@ -361,7 +361,17 @@ ${ tripleBackticks }\n`
               console.log("breakingCommit =\t", breakingCommit)
               const [user, mesage, date, files] = gitMetadata(breakingCommit)
               // Report the breaking commit diagnostics
-              issueCommentStr += `<details><summary>${commit}\t:bug:</summary><h3>Output</h3>\n
+              issueCommentStr += `<details><summary>${commit}\t:bug:</summary><h3>Diagnostics</h3>\n
+${user} on ${date} introduced a bug :bug: on commit [${commit}](https://github.com/nim-lang/Nim/commit/${commit}) with the message:\n
+${ tripleBackticks }
+${mesage}
+${ tripleBackticks }
+\nThe bug is somewhere in these files:\n
+${ tripleBackticks }
+${files}
+${ tripleBackticks }
+(According to @${ context.payload.comment.user.login }'s bug repro code sample).
+<h3>Output</h3>\n
 ${ tripleBackticks }
 ${output}
 ${ tripleBackticks }
@@ -372,17 +382,8 @@ ${ tripleBackticks }
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
 <li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
 <li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
-<h3>Diagnostics</h3>
-${user} on ${date} introduced a Bug :bug: on commit [${commit}](https://github.com/nim-lang/Nim/commit/${commit}) with the message:\n
-${ tripleBackticks }
-${mesage}
-${ tripleBackticks }
-\nThe Bug is somewhere in these files:\n
-${ tripleBackticks }
-${files}
-${ tripleBackticks }
-(According to the bug repro code sample and Git bisect)
-\n</details>\n`
+Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code>
+</details>\n`
               // Break out of the for
               break
             }
