@@ -35,6 +35,9 @@ const indentString = (str, count, indent = ' ') => {
 
 
 function formatDuration(seconds) {
+  if (typeof seconds === "string") {
+    seconds = parseInt(seconds)
+  }
   console.assert(typeof seconds === "number", `seconds must be number, but got ${ typeof seconds }`)
   function numberEnding(number) {
     return (number > 1) ? 's' : '';
