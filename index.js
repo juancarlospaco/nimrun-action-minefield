@@ -378,11 +378,11 @@ ${user} introduced a bug at <code>${date}</code> on commit
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
-\nThe bug can be in the files:\n
+\nThe bug is in the files:\n
 ${ tripleBackticks }
 ${files}
 ${ tripleBackticks }
-\nThe bug can also be hidden in the commits:\n
+\nThe bug can be in the commits:\n
 ${commitsNear}
 :robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.
 </details>\n`
