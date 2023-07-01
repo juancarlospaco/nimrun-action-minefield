@@ -294,7 +294,7 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
           const started  = new Date()  // performance.now()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()  // performance.now()
-          const thumbsUp = (isOk ? ":white_check_mark:" : ":red_square:")
+          const thumbsUp = (isOk ? "\t:+1: OK" : "\t:-1: FAIL")
           // Remember which version works and which version breaks
           if (isOk && works === null) {
             works = semver
@@ -319,11 +319,14 @@ ${ tripleBackticks }\n`
 <h3>AST</h3>\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
-${ tripleBackticks }
-\n<h3>IR</h3>\n
+${ tripleBackticks }\n`
+            if (semver === "devel" || semver === "stable") {
+              issueCommentStr += `
+<h3>IR</h3>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
 ${ tripleBackticks }\n`
+            }
           }
           issueCommentStr += "</details>\n"
         }
@@ -353,7 +356,7 @@ ${ tripleBackticks }\n`
           }
           let commitsNear = "\n<ul>"
           for (let commit of commits) {
-            commitsNear += `<li>[${commit}](https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") })\n`
+            commitsNear += `<li><a href=https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") } >${ commit }</a>\n`
           }
           commitsNear += "</ul>\n"
           const index = 0
@@ -370,7 +373,8 @@ ${ tripleBackticks }\n`
               const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
               // Report the breaking commit diagnostics
               issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
-${user} introduced a bug at <code>${date}</code> on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with message:\n
+${user} introduced a bug at <code>${date}</code> on commit
+<a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ commit }</a> with message:\n
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
@@ -379,7 +383,7 @@ ${ tripleBackticks }
 ${files}
 ${ tripleBackticks }
 <h3>Commits near</h3>
-Diagnostics sometimes off-by-one.
+Diagnostics sometimes off-by-one.\n
 ${commitsNear}
 :robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.
 </details>\n`
