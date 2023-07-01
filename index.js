@@ -352,7 +352,7 @@ ${ tripleBackticks }\n`
             }
           }
           const index = 0
-          const commitsNear = "<ul>"
+          let commitsNear = "<ul>"
           for (let commit of commits) {
             // Choosenim switch semver
             console.log(executeChoosenim(commit))
