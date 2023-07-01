@@ -351,23 +351,24 @@ ${ tripleBackticks }\n`
               commits = commits.slice(midIndex);
             }
           }
-          let index = 0
+          const index = 0
+          const commitsNear = "<ul>"
           for (let commit of commits) {
             // Choosenim switch semver
             console.log(executeChoosenim(commit))
             // Run code
-            const started  = new Date()  // performance.now()
             const [isOk, output] = executeNim(cmd, codes)
-            const finished = new Date()  // performance.now()
+            commitsNear += `<li>[${commit}](https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") })\n`
             // if this commit works, then previous commit is the breakingCommit
             if (isOk) {
+              commitsNear += "</ul>"
               const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
-              console.log("breakingCommit =\t", breakingCommit)
               const [user, mesage, date, files] = gitMetadata(breakingCommit)
-              const comit = breakingCommit.replace('"', '').trim()
+              const comit = breakingCommit.replace('"', '')
+              const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
               // Report the breaking commit diagnostics
               issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
-${user} introduced a bug at <code>${date}</code> on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with the message:\n
+${user} introduced a bug at <code>${date}</code> on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with message:\n
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
@@ -375,7 +376,9 @@ ${ tripleBackticks }
 ${ tripleBackticks }
 ${files}
 ${ tripleBackticks }
-:robot: Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits, ${ commitsLen / (((finished - startedDatetime) % 60000) / 1000) } commits per second.
+<h3>Commits near</h3>
+${commitsNear}
+:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits, <code>${ Math.round(commitsLen / duration) }</code> commits per second.
 </details>\n`
               // Break out of the for
               break
