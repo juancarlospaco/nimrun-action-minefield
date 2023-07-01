@@ -294,7 +294,7 @@ if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
           const started  = new Date()  // performance.now()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()  // performance.now()
-          const thumbsUp = (isOk ? ":+1:" : ":-1:")
+          const thumbsUp = (isOk ? ":white_check_mark:" : ":red_square:")
           // Remember which version works and which version breaks
           if (isOk && works === null) {
             works = semver
@@ -377,6 +377,7 @@ ${ tripleBackticks }
 ${files}
 ${ tripleBackticks }
 <h3>Commits near</h3>
+Diagnostics sometimes off-by-one.
 ${commitsNear}
 :robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits, <code>${ Math.round(commitsLen / duration) }</code> commits per second.
 </details>\n`
