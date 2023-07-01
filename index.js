@@ -384,8 +384,8 @@ ${files}
 ${ tripleBackticks }
 \nThe bug can be in the commits:\n
 ${commitsNear}
-:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.
-</details>\n`
+\n</details>\n
+:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
               // Break out of the for
               break
             }
