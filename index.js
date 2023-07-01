@@ -354,6 +354,7 @@ ${ tripleBackticks }\n`
           let commitsNear = "\n<ul>"
           for (let commit of commits) {
             commitsNear += `<li>[${commit}](https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") })\n`
+          }
           commitsNear += "</ul>\n"
           const index = 0
           for (let commit of commits) {
