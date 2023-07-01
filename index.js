@@ -195,7 +195,7 @@ function executeAstGen(codes) {
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
   fs.writeFileSync(temporaryFile2, "dumpAstGen:\n" + indentString(codes, 2))
   try {
-    return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --import:std/macros ${temporaryFile2}`).toString().trim()
+    return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString().trim()
   } catch (error) {
     console.warn(error)
     return ""
@@ -228,9 +228,8 @@ function getIR() {
 function gitInit() {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
-    console.log(execSync("git config --global advice.detachedHead false").toString())
     console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`).toString())
-    console.log(execSync("git checkout devel", {cwd: gitTempPath}).toString())
+    console.log(execSync("git config --global advice.detachedHead false && git checkout devel", {cwd: gitTempPath}).toString())
   }
 }
 
@@ -337,6 +336,7 @@ ${ tripleBackticks }\n`
           const worksCommit = gitCommitForVersion(works)
           gitInit()
           let commits = gitCommitsBetween(worksCommit, failsCommit)
+          const commitsLen = commits.length + nimFinalVersions.length + 2
           // Split commits in half and check if that commit works or fails,
           // then repeat the split there until we got less than 10 commits.
           while (commits.length > 10) {
@@ -367,18 +367,13 @@ ${ tripleBackticks }\n`
               const comit = breakingCommit.replace('"', '').trim()
               // Report the breaking commit diagnostics
               issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
-${user} on <code>${date}</code> introduced a bug :bug: on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with the message:\n
+${user} introduced a bug at <code>${date}</code> on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with the message:\n
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
-\nThe bug is somewhere in these files:\n
+\nThe bug is in the files:\n
 ${ tripleBackticks }
 ${files}
-${ tripleBackticks }
-(According to @${ context.payload.comment.user.login }'s bug repro code sample).
-<h3>Output</h3>\n
-${ tripleBackticks }
-${output}
 ${ tripleBackticks }
 <h3>Stats</h3><ul>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
@@ -387,7 +382,7 @@ ${ tripleBackticks }
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
 <li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
 <li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
-Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code>
+:robot: Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code> bisecting ${commitsLen} commits.
 </details>\n`
               // Break out of the for
               break
