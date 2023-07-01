@@ -315,13 +315,13 @@ ${ tripleBackticks }\n`
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
 <li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
-<li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
+<li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>\n`
+            if (semver === "devel" || semver === "stable") {
+              issueCommentStr += `
 <h3>AST</h3>\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
-${ tripleBackticks }\n`
-            if (semver === "devel" || semver === "stable") {
-              issueCommentStr += `
+${ tripleBackticks }\n
 <h3>IR</h3>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
@@ -373,8 +373,7 @@ ${ tripleBackticks }\n`
               const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
               // Report the breaking commit diagnostics
               issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
-${user} introduced a bug at <code>${date}</code> on commit
-<a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ commit }</a> with message:\n
+${user} introduced a bug at <code>${date}</code> on commit <a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ comit }</a> with message:\n
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
@@ -384,6 +383,7 @@ ${files}
 ${ tripleBackticks }
 \nThe bug can be in the commits:\n
 ${commitsNear}
+(Diagnostics sometimes off-by-one).
 \n</details>\n
 :robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
               // Break out of the for
