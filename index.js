@@ -336,7 +336,7 @@ ${ tripleBackticks }\n`
           const worksCommit = gitCommitForVersion(works)
           gitInit()
           let commits = gitCommitsBetween(worksCommit, failsCommit)
-          const commitsLen = commits.length + nimFinalVersions.length + 2
+          const commitsLen = commits.length + nimFinalVersions.length
           // Split commits in half and check if that commit works or fails,
           // then repeat the split there until we got less than 10 commits.
           while (commits.length > 10) {
@@ -366,7 +366,7 @@ ${ tripleBackticks }\n`
               const [user, mesage, date, files] = gitMetadata(breakingCommit)
               const comit = breakingCommit.replace('"', '').trim()
               // Report the breaking commit diagnostics
-              issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>
+              issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
 ${user} introduced a bug at <code>${date}</code> on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with the message:\n
 ${ tripleBackticks }
 ${mesage}
@@ -375,7 +375,7 @@ ${ tripleBackticks }
 ${ tripleBackticks }
 ${files}
 ${ tripleBackticks }
-:robot: Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits.
+:robot: Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits, ${ commitsLen / (((finished - startedDatetime) % 60000) / 1000) } commits per second.
 </details>\n`
               // Break out of the for
               break
