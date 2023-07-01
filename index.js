@@ -17,7 +17,7 @@ const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile} `
 const extraFlags       = " --run -d:strip -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --threads:off --verbosity:0 --hints:off --warnings:off --lineTrace:off" + preparedFlags
-const nimFinalVersions = ["devel", "stable", "1.4.0"]
+const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
 
 
@@ -366,7 +366,7 @@ ${ tripleBackticks }\n`
               const [user, mesage, date, files] = gitMetadata(breakingCommit)
               const comit = breakingCommit.replace('"', '').trim()
               // Report the breaking commit diagnostics
-              issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
+              issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>
 ${user} introduced a bug at <code>${date}</code> on commit [${comit}](https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") }) with the message:\n
 ${ tripleBackticks }
 ${mesage}
@@ -375,14 +375,7 @@ ${ tripleBackticks }
 ${ tripleBackticks }
 ${files}
 ${ tripleBackticks }
-<h3>Stats</h3><ul>
-<li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
-<li><b>Started </b>\t<code>${ started.toISOString().split('.').shift()  }</code>
-<li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
-<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
-<li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
-<li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>
-:robot: Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code> bisecting ${commitsLen} commits.
+:robot: Bug found in <code>${ formatDuration((((finished - startedDatetime) % 60000) / 1000).toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits.
 </details>\n`
               // Break out of the for
               break
