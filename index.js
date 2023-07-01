@@ -351,17 +351,18 @@ ${ tripleBackticks }\n`
               commits = commits.slice(midIndex);
             }
           }
+          let commitsNear = "\n<ul>"
+          for (let commit of commits) {
+            commitsNear += `<li>[${commit}](https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") })\n`
+          commitsNear += "</ul>\n"
           const index = 0
-          let commitsNear = "<ul>"
           for (let commit of commits) {
             // Choosenim switch semver
             console.log(executeChoosenim(commit))
             // Run code
             const [isOk, output] = executeNim(cmd, codes)
-            commitsNear += `<li>[${commit}](https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") })\n`
             // if this commit works, then previous commit is the breakingCommit
             if (isOk) {
-              commitsNear += "</ul>"
               const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
               const [user, mesage, date, files] = gitMetadata(breakingCommit)
               const comit = breakingCommit.replace('"', '')
@@ -379,7 +380,7 @@ ${ tripleBackticks }
 <h3>Commits near</h3>
 Diagnostics sometimes off-by-one.
 ${commitsNear}
-:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits, <code>${ Math.round(commitsLen / duration) }</code> commits per second.
+:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.
 </details>\n`
               // Break out of the for
               break
