@@ -158,7 +158,7 @@ function parseGithubCommand(comment) {
 
 function executeChoosenim(semver) {
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     try {
       const result = execSync(`choosenim --noColor --skipClean --yes update "${semver}"`, choosenimNoAnal).toString().trim()
       if (result) {
@@ -166,8 +166,8 @@ function executeChoosenim(semver) {
       }
     } catch (error) {
       console.warn(error)
-      if (i === 4) {
-        console.warn('choosenim failed 5 times, giving up...')
+      if (i === 2) {
+        console.warn('choosenim failed >3 times, giving up...')
         return ""
       }
     }
