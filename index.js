@@ -19,6 +19,7 @@ const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFil
 const extraFlags       = " --run -d:strip -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --threads:off --verbosity:0 --hints:off --warnings:off --lineTrace:off" + preparedFlags
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
+const debugGodModes    = ["araq", "juancarlospaco"]
 
 
 const cfg = (key) => {
@@ -83,13 +84,16 @@ function getFilesizeInBytes(filename) {
 
 function checkAuthorAssociation() {
   const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
-  let result = (authorPerm === "owner" || authorPerm === "collaborator" || context.payload.comment.user.login === "juancarlospaco")
+  let result = (authorPerm === "owner" || authorPerm === "collaborator" || debugGodModes.includes(context.payload.comment.user.login))
   console.assert(typeof result === "boolean", `result must be boolean, but got ${ typeof result }`)
   return result
 };
 
 
 async function checkCollaboratorPermissionLevel(githubClient, levels) {
+  if (debugGodModes.includes(context.payload.comment.user.login)) {
+    return true
+  }
   const permissionRes = await githubClient.repos.getCollaboratorPermissionLevel({
     owner   : context.repo.owner,
     repo    : context.repo.repo,
