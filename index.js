@@ -360,7 +360,7 @@ ${ tripleBackticks }\n`
             commitsNear += `<li><a href=https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") } >${ commit }</a>\n`
           }
           commitsNear += "</ul>\n"
-          const index = 0
+          let index = 0
           for (let commit of commits) {
             // Choosenim switch semver
             console.log(executeChoosenim(commit))
