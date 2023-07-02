@@ -360,6 +360,7 @@ ${ tripleBackticks }\n`
             commitsNear += `<li><a href=https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") } >${ commit }</a>\n`
           }
           commitsNear += "</ul>\n"
+          let bugFound = false
           let index = 0
           for (let commit of commits) {
             // Choosenim switch semver
@@ -368,10 +369,13 @@ ${ tripleBackticks }\n`
             const [isOk, output] = executeNim(cmd, codes)
             // if this commit works, then previous commit is the breakingCommit
             if (isOk) {
+              if (!bugFound) {
+                bugFound = true
+              }
               const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
               const [user, mesage, date, files] = gitMetadata(breakingCommit)
               const comit = breakingCommit.replace('"', '')
-              const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
+
               // Report the breaking commit diagnostics
               issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
 ${user} introduced a bug at <code>${date}</code> on commit <a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ comit }</a> with message:\n
@@ -384,18 +388,30 @@ ${files}
 ${ tripleBackticks }
 \nThe bug can be in the commits:\n
 ${commitsNear}
-(Diagnostics sometimes off-by-one).
-\n</details>\n
-:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
+(Diagnostics sometimes off-by-one).\n</details>\n`
               // Break out of the for
               break
             }
             index++
           }
+          if (!bugFound) {
+            issueCommentStr += `<details><summary>??? :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
+The commit that introduced the bug can not be found, but the bug is in the commits:
+${commitsNear}
+(Diagnostics can not find the commit because Nim can not be re-built commit-by-commit to bisect).\n</details>\n`
+          }
+          const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
+          issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         // Report results back as a comment on the issue.
         addIssueComment(githubClient, issueCommentStr)
         }
       }
+    } else {
+      console.log(`githubComment must start with ${ commentPrefix }`)
     }
+  } else {
+    console.log("checkCollaboratorPermissionLevel() failed.")
   }
+} else {
+  console.log("checkAuthorAssociation() failed.")
 }
