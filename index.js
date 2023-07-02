@@ -84,7 +84,7 @@ function getFilesizeInBytes(filename) {
 
 function checkAuthorAssociation() {
   const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
-  let result = (authorPerm === "owner" || authorPerm === "collaborator" || debugGodModes.includes(context.payload.comment.user.login))
+  let result = (authorPerm === "owner" || authorPerm === "collaborator" || authorPerm === "member" || debugGodModes.includes(context.payload.comment.user.login.toLowerCase()))
   console.assert(typeof result === "boolean", `result must be boolean, but got ${ typeof result }`)
   return result
 };
@@ -99,7 +99,7 @@ async function checkCollaboratorPermissionLevel(githubClient, levels) {
   if ( permissionRes.status !== 200 ) {
     return false
   }
-  return (levels.includes(permissionRes.data.permission) || debugGodModes.includes(context.payload.comment.user.login))
+  return (levels.includes(permissionRes.data.permission) || debugGodModes.includes(context.payload.comment.user.login.toLowerCase()))
 };
 
 
@@ -398,7 +398,7 @@ ${commitsNear}
             issueCommentStr += `<details><summary>??? :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
 The commit that introduced the bug can not be found, but the bug is in the commits:
 ${commitsNear}
-(Diagnostics can not find the commit because Nim can not be re-built commit-by-commit to bisect).\n</details>\n`
+(Can not find the commit because Nim can not be re-built commit-by-commit to bisect).\n</details>\n`
           }
           const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
           issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
@@ -406,12 +406,9 @@ ${commitsNear}
         addIssueComment(githubClient, issueCommentStr)
         }
       }
-    } else {
-      console.log(`githubComment must start with ${ commentPrefix }`)
     }
-  } else {
-    console.log("checkCollaboratorPermissionLevel() failed.")
+    // else { console.log(`githubComment must start with ${ commentPrefix }`) }
   }
-} else {
-  console.log("checkAuthorAssociation() failed.")
+  // else { console.log("checkCollaboratorPermissionLevel() failed.") }
 }
+// else { console.log("checkAuthorAssociation() failed.") }
