@@ -91,9 +91,6 @@ function checkAuthorAssociation() {
 
 
 async function checkCollaboratorPermissionLevel(githubClient, levels) {
-  if (debugGodModes.includes(context.payload.comment.user.login)) {
-    return true
-  }
   const permissionRes = await githubClient.repos.getCollaboratorPermissionLevel({
     owner   : context.repo.owner,
     repo    : context.repo.repo,
@@ -102,7 +99,7 @@ async function checkCollaboratorPermissionLevel(githubClient, levels) {
   if ( permissionRes.status !== 200 ) {
     return false
   }
-  return levels.includes(permissionRes.data.permission)
+  return (levels.includes(permissionRes.data.permission) || debugGodModes.includes(context.payload.comment.user.login))
 };
 
 
