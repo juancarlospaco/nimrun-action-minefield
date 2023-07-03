@@ -8,7 +8,7 @@ const { execSync } = require('child_process');
 const {context, GitHub} = require('@actions/github')
 
 
-const startedDatetime  = new Date()  // performance.now()
+const startedDatetime  = new Date()
 const tripleBackticks  = "```"
 const gitTempPath      = `${ process.cwd() }/Nim`
 const temporaryFile    = `${ process.cwd() }/temp.nim`
@@ -20,6 +20,7 @@ const extraFlags       = " --run -d:strip -d:ssl -d:nimDisableCertificateValidat
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
 const debugGodModes    = ["araq", "juancarlospaco"]
+const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
 
 
 const cfg = (key) => {
@@ -273,12 +274,12 @@ function gitCommitForVersion(semver) {
 
 
 // Only run if this is an "issue_comment" and checkAuthorAssociation.
-if (context.eventName === "issue_comment" && checkAuthorAssociation()) {
+if (context.eventName === "issue_comment" && (checkAuthorAssociation() || unlockedAllowAll) ) {
   const githubToken   = cfg('github-token')
   const githubClient  = new GitHub(githubToken)
   let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
   // Check if we have permissions.
-  if (checkCollaboratorPermissionLevel(githubClient, ['admin', 'write'])) {
+  if (checkCollaboratorPermissionLevel(githubClient, ['admin', 'write']) || unlockedAllowAll) {
     const commentPrefix = "@github-actions nim"
     const githubComment = context.payload.comment.body.trim()
     // Check if github comment starts with commentPrefix.
