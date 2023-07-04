@@ -264,9 +264,10 @@ function gitCommitForVersion(semver) {
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   executeChoosenim(semver)
   const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '')
+  let result = null
   for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
-      let result = s.replace("git hash:", "").trim().toLowerCase()
+      result = s.replace("git hash:", "").trim().toLowerCase()
       console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
       return result
     }
@@ -333,46 +334,47 @@ ${ tripleBackticks }\n`
           // Get a range of commits between "FAILS..WORKS"
           const failsCommit = gitCommitForVersion(fails)
           const worksCommit = gitCommitForVersion(works)
-          gitInit()
-          let commits = gitCommitsBetween(worksCommit, failsCommit)
-          const commitsLen = commits.length + nimFinalVersions.length
-          // Split commits in half and check if that commit works or fails,
-          // then repeat the split there until we got less than 10 commits.
-          while (commits.length > 10) {
-            let midIndex = Math.ceil(commits.length / 2)
-            console.log(executeChoosenim(commits[midIndex]))
-            let [isOk, output] = executeNim(cmd, codes)
-            if (isOk) {
-              // iff its OK then split 0..mid
-              commits = commits.slice(0, midIndex);
-            } else {
-              // else NOT OK then split mid..end
-              commits = commits.slice(midIndex);
-            }
-          }
-          let commitsNear = "\n<ul>"
-          for (let commit of commits) {
-            commitsNear += `<li><a href=https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") } >${ commit }</a>\n`
-          }
-          commitsNear += "</ul>\n"
-          let bugFound = false
-          let index = 0
-          for (let commit of commits) {
-            // Choosenim switch semver
-            console.log(executeChoosenim(commit))
-            // Run code
-            const [isOk, output] = executeNim(cmd, codes)
-            // if this commit works, then previous commit is the breakingCommit
-            if (isOk) {
-              if (!bugFound) {
-                bugFound = true
+          if (failsCommit !== null && worksCommit !== null) {
+            gitInit()
+            let commits = gitCommitsBetween(worksCommit, failsCommit)
+            const commitsLen = commits.length + nimFinalVersions.length
+            // Split commits in half and check if that commit works or fails,
+            // then repeat the split there until we got less than 10 commits.
+            while (commits.length > 10) {
+              let midIndex = Math.ceil(commits.length / 2)
+              console.log(executeChoosenim(commits[midIndex]))
+              let [isOk, output] = executeNim(cmd, codes)
+              if (isOk) {
+                // iff its OK then split 0..mid
+                commits = commits.slice(0, midIndex);
+              } else {
+                // else NOT OK then split mid..end
+                commits = commits.slice(midIndex);
               }
-              const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
-              const [user, mesage, date, files] = gitMetadata(breakingCommit)
-              const comit = breakingCommit.replace('"', '')
+            }
+            let commitsNear = "\n<ul>"
+            for (let commit of commits) {
+              commitsNear += `<li><a href=https://github.com/nim-lang/Nim/commit/${ commit.replace("#", "") } >${ commit }</a>\n`
+            }
+            commitsNear += "</ul>\n"
+            let bugFound = false
+            let index = 0
+            for (let commit of commits) {
+              // Choosenim switch semver
+              console.log(executeChoosenim(commit))
+              // Run code
+              const [isOk, output] = executeNim(cmd, codes)
+              // if this commit works, then previous commit is the breakingCommit
+              if (isOk) {
+                if (!bugFound) {
+                  bugFound = true
+                }
+                const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
+                const [user, mesage, date, files] = gitMetadata(breakingCommit)
+                const comit = breakingCommit.replace('"', '')
 
-              // Report the breaking commit diagnostics
-              issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
+                // Report the breaking commit diagnostics
+                issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
 ${user} introduced a bug at <code>${date}</code> on commit <a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ comit }</a> with message:\n
 ${ tripleBackticks }
 ${mesage}
@@ -384,19 +386,21 @@ ${ tripleBackticks }
 \nThe bug can be in the commits:\n
 ${commitsNear}
 (Diagnostics sometimes off-by-one).\n</details>\n`
-              // Break out of the for
-              break
+                // Break out of the for
+                break
+              }
+              index++
             }
-            index++
-          }
-          if (!bugFound) {
-            issueCommentStr += `<details><summary>??? :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
+            if (!bugFound) {
+              issueCommentStr += `<details><summary>??? :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
 The commit that introduced the bug can not be found, but the bug is in the commits:
 ${commitsNear}
 (Can not find the commit because Nim can not be re-built commit-by-commit to bisect).\n</details>\n`
+            }
           }
+          else { console.warn("failsCommit and worksCommit not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
         }
-        else { console.warn("At least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
+        else { console.warn("works and fails not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
         // Report results back as a comment on the issue.
         const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
         issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
