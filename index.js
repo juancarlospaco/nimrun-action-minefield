@@ -263,7 +263,7 @@ function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   executeChoosenim(semver)
-  const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '')
+  const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '').filter(line => (typeof line === "string"))
   let result = null
   for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
@@ -318,13 +318,13 @@ ${ tripleBackticks }\n
           // Iff NOT Ok add AST and IR info for debugging purposes.
           if (!isOk) {
             issueCommentStr += `
-<h3>AST</h3>\n
-${ tripleBackticks }nim
-${ executeAstGen(codes) }
-${ tripleBackticks }\n
 <h3>IR</h3>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
+${ tripleBackticks }\n
+<h3>AST</h3>\n
+${ tripleBackticks }nim
+${ executeAstGen(codes) }
 ${ tripleBackticks }\n`
           }
           issueCommentStr += "</details>\n"
