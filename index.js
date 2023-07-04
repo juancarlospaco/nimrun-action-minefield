@@ -146,7 +146,7 @@ function parseGithubCommand(comment) {
   let result = comment.trim().split("\n")[0].trim()
   if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js") || result.startsWith("!nim e")) {
     if (result.startsWith("!nim js")) {
-      result = result + " -d:nodejs "
+      result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen "
     }
     result = result.substring(1) // Remove the leading "!"
     result = result + extraFlags
