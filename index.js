@@ -288,6 +288,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
         const cmd           = parseGithubCommand(githubComment)
         let fails           = null
         let works           = null
+        let commitsLen      = nimFinalVersions.length
         let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
         // Check the same code agaisnt all versions of Nim from devel to 1.0
         for (let semver of nimFinalVersions) {
@@ -338,7 +339,7 @@ ${ tripleBackticks }\n`
           if (failsCommit !== null && worksCommit !== null) {
             gitInit()
             let commits = gitCommitsBetween(worksCommit, failsCommit)
-            const commitsLen = commits.length + nimFinalVersions.length
+            commitsLen += commits.length
             // Split commits in half and check if that commit works or fails,
             // then repeat the split there until we got less than 10 commits.
             while (commits.length > 10) {
