@@ -263,7 +263,7 @@ function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   executeChoosenim(semver)
-  const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => line.trim() !== '').filter(line => (typeof line === "string"))
+  const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => (typeof line === "string" && line.trim() !== ''))
   let result = null
   for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
@@ -271,7 +271,7 @@ function gitCommitForVersion(semver) {
       break
     }
   }
-  console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
+  console.assert(typeof result === "string", `result must be string, but got gitCommitForVersion ${ typeof result }\t${ result }`)
   return result
 }
 
