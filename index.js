@@ -19,8 +19,9 @@ const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFil
 const extraFlags       = " --run -d:strip -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --threads:off --verbosity:0 --hints:off --warnings:off --lineTrace:off" + preparedFlags
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
-const debugGodModes    = ["araq", "juancarlospaco"]
+const debugGodModes    = ["araq"]
 const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
+const commentPrefix = "@github-actions nim"
 
 
 const cfg = (key) => {
@@ -273,53 +274,47 @@ function gitCommitForVersion(semver) {
 }
 
 
-// Only run if this is an "issue_comment" and checkAuthorAssociation.
-if (context.eventName === "issue_comment" && (checkAuthorAssociation() || unlockedAllowAll) ) {
-  const githubToken   = cfg('github-token')
-  const githubClient  = new GitHub(githubToken)
-  let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
+// Only run if this is an "issue_comment" and comment startsWith commentPrefix.
+if (context.eventName === "issue_comment" && context.payload.comment.body.trim().toLowerCase().startsWith(commentPrefix) && (unlockedAllowAll || checkAuthorAssociation()) ) {
   // Check if we have permissions.
-  if (checkCollaboratorPermissionLevel(githubClient, ['admin', 'write']) || unlockedAllowAll) {
-    const commentPrefix = "@github-actions nim"
-    const githubComment = context.payload.comment.body.trim()
-    // Check if github comment starts with commentPrefix.
-    if (githubComment.startsWith(commentPrefix)) {
-      const codes = parseGithubComment(githubComment)
-      const cmd   = parseGithubCommand(githubComment)
+  const githubClient  = new GitHub(cfg('github-token'))
+  if (unlockedAllowAll || checkCollaboratorPermissionLevel(githubClient, ['admin', 'write'])) {
       // Add Reaction of "Eyes" as seen.
       if (addReaction(githubClient, "eyes")) {
-        let fails = null
-        let works = null
+        const githubComment = context.payload.comment.body.trim()
+        const codes         = parseGithubComment(githubComment)
+        const cmd           = parseGithubCommand(githubComment)
+        let fails           = null
+        let works           = null
+        let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
         // Check the same code agaisnt all versions of Nim from devel to 1.0
         for (let semver of nimFinalVersions) {
           console.log(executeChoosenim(semver))
-          const started  = new Date()  // performance.now()
+          const started  = new Date()
           const [isOk, output] = executeNim(cmd, codes)
-          const finished = new Date()  // performance.now()
+          const finished = new Date()
           const thumbsUp = (isOk ? "\t:+1: OK" : "\t:-1: FAIL")
-          // Remember which version works and which version breaks
+          // Remember which version works and which version breaks.
           if (isOk && works === null) {
             works = semver
           }
           else if (!isOk && fails === null) {
             fails = semver
           }
-          // Append to reports
+          // Append to reports.
           issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
 ${output}
-${ tripleBackticks }\n`
-          // Iff Ok add meta info
-          if (isOk) {
-            issueCommentStr += `<h3>Stats</h3><ul>
-<li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
-<li><b>Started </b>\t<code>${ started.toISOString().split('.').shift()  }</code>
+${ tripleBackticks }\n
+<h3>Stats</h3><ul>
+<li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
+<li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
-<li><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>
 <li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>\n`
-            if (semver === "devel" || semver === "stable") {
-              issueCommentStr += `
+          // Iff NOT Ok add AST and IR info for debugging purposes.
+          if (!isOk) {
+            issueCommentStr += `
 <h3>AST</h3>\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
@@ -328,7 +323,6 @@ ${ tripleBackticks }\n
 ${ tripleBackticks }cpp
 ${ getIR() }
 ${ tripleBackticks }\n`
-            }
           }
           issueCommentStr += "</details>\n"
         }
@@ -401,15 +395,14 @@ The commit that introduced the bug can not be found, but the bug is in the commi
 ${commitsNear}
 (Can not find the commit because Nim can not be re-built commit-by-commit to bisect).\n</details>\n`
           }
-          const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
-          issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
-        // Report results back as a comment on the issue.
-        addIssueComment(githubClient, issueCommentStr)
         }
-      }
+        else { console.warn("At least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
+        // Report results back as a comment on the issue.
+        const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
+        issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
+        addIssueComment(githubClient, issueCommentStr)
     }
-    // else { console.log(`githubComment must start with ${ commentPrefix }`) }
+    else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
   }
-  // else { console.log("checkCollaboratorPermissionLevel() failed.") }
+  else { console.log("githubClient.checkCollaboratorPermissionLevel failed, user permissions error?.") }
 }
-// else { console.log("checkAuthorAssociation() failed.") }
