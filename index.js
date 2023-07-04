@@ -144,20 +144,16 @@ function parseGithubComment(comment) {
 function parseGithubCommand(comment) {
   console.assert(typeof comment === "string", `comment must be string, but got ${ typeof comment }`)
   let result = comment.trim().split("\n")[0].trim()
-  if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js") || result.startsWith("!nim e")) {
+  if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js")) {
     if (result.startsWith("!nim js")) {
       result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen "
     }
-    if (result.startsWith("!nim e")) {
-      result = result + extraFlags.replace("--run", "") + temporaryFile + "s"
-    } else {
-      result = result + extraFlags + preparedFlags
-    }
+    result = result + extraFlags + preparedFlags
     result = result.substring(1) // Remove the leading "!"
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
     return result.trim()
   } else {
-    core.setFailed("Github comment must start with '!nim c ' or '!nim cpp ' or '!nim js '")
+    core.setFailed("Github comment must start with '!nim c' or '!nim cpp' or '!nim js'")
   }
 };
 
@@ -187,6 +183,7 @@ function executeNim(cmd, codes) {
   if (!fs.existsSync(temporaryFile)) {
     fs.writeFileSync(temporaryFile, codes)
     fs.chmodSync(temporaryFile, "444")
+    fs.symlinkSync(temporaryFile, temporaryFile + "s", 'file')
   }
   console.log("COMMAND:\t", cmd)
   try {
