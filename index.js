@@ -153,7 +153,7 @@ function parseGithubCommand(comment) {
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
     return result.trim()
   } else {
-    core.setFailed("Github comment must start with '@github-actions nim c' or '@github-actions nim cpp' or '@github-actions nim js'")
+    core.setFailed("Github comment must start with '!nim c' or '!nim cpp' or '!nim js'")
   }
 };
 
