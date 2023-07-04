@@ -144,11 +144,11 @@ function parseGithubComment(comment) {
 function parseGithubCommand(comment) {
   console.assert(typeof comment === "string", `comment must be string, but got ${ typeof comment }`)
   let result = comment.trim().split("\n")[0].trim()
-  if (result.startsWith("@github-actions nim c") || result.startsWith("@github-actions nim cpp") || result.startsWith("@github-actions nim js") || result.startsWith("@github-actions nim e")) {
-    if (result.startsWith("@github-actions nim js")) {
+  if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js") || result.startsWith("!nim e")) {
+    if (result.startsWith("!nim js")) {
       result = result + " -d:nodejs "
     }
-    result = result.replace("@github-actions", "")
+    result = result.substring(1) // Remove the leading "!"
     result = result + extraFlags
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
     return result.trim()
