@@ -275,7 +275,7 @@ function gitCommitForVersion(semver) {
     }
   } else {
     // For semver == "x.x.x" we use Git
-    result = execSync(`git checkout v${semver} && git rev-parse --short HEAD`, {cwd: gitTempPath}).toString().trim().toLowerCase()
+    result = execSync(`git checkout "v${semver}" && git rev-parse --short HEAD`, {cwd: gitTempPath}).toString().trim().toLowerCase()
     execSync(`git checkout devel`, {cwd: gitTempPath}) // Go back to devel
   }
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
@@ -341,10 +341,10 @@ ${ tripleBackticks }\n`
         // This part is about finding the specific commit that breaks
         if (works !== null && fails !== null) {
           // Get a range of commits between "FAILS..WORKS"
+          gitInit()
           const failsCommit = gitCommitForVersion(fails)
           const worksCommit = gitCommitForVersion(works)
           if (failsCommit !== null && worksCommit !== null) {
-            gitInit()
             let commits = gitCommitsBetween(worksCommit, failsCommit)
             commitsLen += commits.length
             // Split commits in half and check if that commit works or fails,
