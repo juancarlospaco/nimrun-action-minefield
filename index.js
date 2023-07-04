@@ -268,10 +268,11 @@ function gitCommitForVersion(semver) {
   for (const s of nimversion) {
     if (s.startsWith("git hash:")) {
       result = s.replace("git hash:", "").trim().toLowerCase()
-      console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
-      return result
+      break
     }
   }
+  console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
+  return result
 }
 
 
