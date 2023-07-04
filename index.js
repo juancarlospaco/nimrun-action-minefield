@@ -263,8 +263,7 @@ function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   let result = null
-  // For semver === "devel" or semver === "stable" we use choosenim
-  semver = semver.trim().toLowerCase()
+  semver     = semver.trim().toLowerCase()
   if (semver === "1.6.0") {
     result = "727c637"
   } else if (semver === "1.4.0") {
@@ -274,6 +273,7 @@ function gitCommitForVersion(semver) {
   } else if (semver === "1.0.0") {
     result = "f7a8fc4"
   } else if (semver === "devel" || semver === "stable") {
+    // For semver === "devel" or semver === "stable" we use choosenim
     executeChoosenim(semver) // devel and stable are moving targets.
     const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => (typeof line === "string" && line.trim() !== ''))
     for (const s of nimversion) {
@@ -393,7 +393,7 @@ ${ tripleBackticks }\n`
 
                 // Report the breaking commit diagnostics
                 issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
-@${user} introduced a bug at <code>${date}</code> on commit <a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ comit }</a> with message:\n
+${user} introduced a bug at <code>${date}</code> on commit <a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ comit }</a> with message:\n
 ${ tripleBackticks }
 ${mesage}
 ${ tripleBackticks }
