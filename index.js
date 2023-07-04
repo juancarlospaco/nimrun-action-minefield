@@ -264,8 +264,17 @@ function gitCommitForVersion(semver) {
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   let result = null
   // For semver === "devel" or semver === "stable" we use choosenim
-  if (semver === "devel" || semver === "stable") {
-    executeChoosenim(semver)
+  semver = semver.trim().toLowerCase()
+  if (semver === "1.6.0") {
+    result = "727c637"
+  } else if (semver === "1.4.0") {
+    result = "018ae96"
+  } else if (semver === "1.2.0") {
+    result = "7e83adf"
+  } else if (semver === "1.0.0") {
+    result = "f7a8fc4"
+  } else if (semver === "devel" || semver === "stable") {
+    executeChoosenim(semver) // devel and stable are moving targets.
     const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => (typeof line === "string" && line.trim() !== ''))
     for (const s of nimversion) {
       if (s.startsWith("git hash:")) {
