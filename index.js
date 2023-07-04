@@ -262,16 +262,23 @@ function gitCommitsBetween(commitOld, commitNew) {
 function gitCommitForVersion(semver) {
   // Get Git commit for an specific Nim semver
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
-  executeChoosenim(semver)
-  const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => (typeof line === "string" && line.trim() !== ''))
   let result = null
-  for (const s of nimversion) {
-    if (s.startsWith("git hash:")) {
-      result = s.replace("git hash:", "").trim().toLowerCase()
-      break
+  // For semver === "devel" or semver === "stable" we use choosenim
+  if (semver === "devel" || semver === "stable") {
+    executeChoosenim(semver)
+    const nimversion = execSync("nim --version").toString().trim().toLowerCase().split('\n').filter(line => (typeof line === "string" && line.trim() !== ''))
+    for (const s of nimversion) {
+      if (s.startsWith("git hash:")) {
+        result = s.replace("git hash:", "").trim().toLowerCase()
+        break
+      }
     }
+  } else {
+    // For semver == "x.x.x" we use Git
+    result = execSync(`git checkout v${semver} && git rev-parse --short HEAD`, {cwd: gitTempPath}).toString().trim().toLowerCase()
+    execSync(`git checkout devel`, {cwd: gitTempPath}) // Go back to devel
   }
-  console.assert(typeof result === "string", `result must be string, but got gitCommitForVersion ${ typeof result }\t${ result }`)
+  console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result
 }
 
