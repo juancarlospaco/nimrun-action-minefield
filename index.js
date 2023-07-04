@@ -183,7 +183,6 @@ function executeNim(cmd, codes) {
   if (!fs.existsSync(temporaryFile)) {
     fs.writeFileSync(temporaryFile, codes)
     fs.chmodSync(temporaryFile, "444")
-    fs.symlinkSync(temporaryFile, temporaryFile + "s", 'file')
   }
   console.log("COMMAND:\t", cmd)
   try {
