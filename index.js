@@ -144,11 +144,11 @@ function parseGithubComment(comment) {
 function parseGithubCommand(comment) {
   console.assert(typeof comment === "string", `comment must be string, but got ${ typeof comment }`)
   let result = comment.trim().split("\n")[0].trim()
-  if (result.startsWith("!nim c ") || result.startsWith("!nim cpp ") || result.startsWith("!nim js ") || result.startsWith("!nim e ")) {
-    if (result.startsWith("!nim js ")) {
+  if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js") || result.startsWith("!nim e")) {
+    if (result.startsWith("!nim js")) {
       result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen "
     }
-    if (result.startsWith("!nim e ")) {
+    if (result.startsWith("!nim e")) {
       result = result + extraFlags.replace("--run", "")
     } else {
       result = result + extraFlags
