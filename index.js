@@ -32,11 +32,6 @@ const cfg = (key) => {
 };
 
 
-const indentString = (str, count, indent = ' ') => {
-  return str.replace(/^/gm, indent.repeat(count))
-}
-
-
 function formatDuration(seconds) {
   if (typeof seconds === "string") {
     seconds = parseInt(seconds)
@@ -196,7 +191,7 @@ function executeNim(cmd, codes) {
 
 function executeAstGen(codes) {
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
-  fs.writeFileSync(temporaryFile2, "dumpAstGen:\n" + indentString(codes, 2))
+  fs.writeFileSync(temporaryFile2, `dumpAstGen(\n${codes}\n)`)
   try {
     return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString().trim()
   } catch (error) {
@@ -232,7 +227,7 @@ function gitInit() {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
     console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`).toString())
-    console.log(execSync("git config --global advice.detachedHead false && git checkout devel", {cwd: gitTempPath}).toString())
+    console.log(execSync("git --quiet config --global advice.detachedHead false && git --quiet checkout devel", {cwd: gitTempPath}).toString())
   }
 }
 
@@ -284,8 +279,8 @@ function gitCommitForVersion(semver) {
     }
   } else {
     // For semver == "x.x.x" we use Git
-    result = execSync(`git checkout "v${semver}" && git rev-parse --short HEAD`, {cwd: gitTempPath}).toString().trim().toLowerCase()
-    execSync(`git checkout devel`, {cwd: gitTempPath}) // Go back to devel
+    result = execSync(`git --quiet checkout "v${semver}" && git rev-parse --short HEAD`, {cwd: gitTempPath}).toString().trim().toLowerCase()
+    execSync(`git --quiet checkout devel`, {cwd: gitTempPath}) // Go back to devel
   }
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result
@@ -334,7 +329,7 @@ ${ tripleBackticks }\n
           // Iff NOT Ok add AST and IR info for debugging purposes.
           if (!isOk) {
             issueCommentStr += `
-<h3>IR</h3>\n
+<h3>IR</h3><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
 ${ tripleBackticks }\n
