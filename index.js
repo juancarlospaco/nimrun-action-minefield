@@ -129,6 +129,7 @@ function parseGithubComment(comment) {
   for (const token of tokens) {
     if (token.type === 'code' && token.lang === 'nim' && token.text.length > 0) {
       result = token.text.trim()
+      result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
       console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
       return result
     }
@@ -139,6 +140,10 @@ function parseGithubComment(comment) {
 function parseGithubCommand(comment) {
   console.assert(typeof comment === "string", `comment must be string, but got ${ typeof comment }`)
   let result = comment.trim().split("\n")[0].trim()
+  const bannedSeps = [";", "&&", "||"]
+  if (bannedSeps.some(s => result.includes(s))) {
+    core.setFailed(`Github comment must not contain ${bannedSeps}`)
+  }
   if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js")) {
     if (result.startsWith("!nim js")) {
       result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen "
@@ -227,7 +232,7 @@ function gitInit() {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
     console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`).toString())
-    console.log(execSync("git --quiet config --global advice.detachedHead false && git --quiet checkout devel", {cwd: gitTempPath}).toString())
+    console.log(execSync("git config --global advice.detachedHead false && git checkout devel", {cwd: gitTempPath}).toString())
   }
 }
 
@@ -279,8 +284,8 @@ function gitCommitForVersion(semver) {
     }
   } else {
     // For semver == "x.x.x" we use Git
-    result = execSync(`git --quiet checkout "v${semver}" && git rev-parse --short HEAD`, {cwd: gitTempPath}).toString().trim().toLowerCase()
-    execSync(`git --quiet checkout devel`, {cwd: gitTempPath}) // Go back to devel
+    result = execSync(`git checkout "v${semver}" && git rev-parse --short HEAD`, {cwd: gitTempPath}).toString().trim().toLowerCase()
+    execSync(`git checkout devel`, {cwd: gitTempPath}) // Go back to devel
   }
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result
