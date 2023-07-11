@@ -272,6 +272,8 @@ function gitCommitForVersion(semver) {
     result = "7e83adf"
   } else if (semver === "1.0.0") {
     result = "f7a8fc4"
+  } else if (semver === "0.20.2") {
+    result = "88a0edb"
   } else if (semver === "devel" || semver === "stable") {
     // For semver === "devel" or semver === "stable" we use choosenim
     executeChoosenim(semver) // devel and stable are moving targets.
@@ -428,4 +430,3 @@ ${commitsNear}
   }
   else { console.log("githubClient.checkCollaboratorPermissionLevel failed, user permissions error?.") }
 }
-
