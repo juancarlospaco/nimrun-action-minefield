@@ -127,17 +127,19 @@ function parseGithubComment(comment) {
   const tokens = marked.Lexer.lex(comment)
   let result = ""
   for (const token of tokens) {
-    console.log("------------------------------>token.lang\t", token.lang)
     if (token.type === 'code' && token.text.trim().length > 0) {
+      console.log("------------------------------>token.lang\t", token.lang)
       if (token.lang === 'nim') {
         result = token.text.trim()
         result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
       }
-      if (token.lang === 'nim') {
-        // result[1] = token.text.trim()
-      }
-      return result
+      // if (token.lang === 'nim') {
+      //   // result[1] = token.text.trim()
+      // }
+
+    }
   }
+  return result
 };
 
 
