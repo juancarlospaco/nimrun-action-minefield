@@ -32,6 +32,11 @@ const cfg = (key) => {
 };
 
 
+const indentString = (str, count = 2, indent = ' ') => {
+  return str.replace(/^/gm, indent.repeat(count))
+}
+
+
 function formatDuration(seconds) {
   if (typeof seconds === "string") {
     seconds = parseInt(seconds)
@@ -227,7 +232,7 @@ function executeNim(cmd, codes) {
 
 function executeAstGen(codes) {
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
-  fs.writeFileSync(temporaryFile2, `dumpAstGen(\n${codes}\n)`)
+  fs.writeFileSync(temporaryFile2, `dumpAstGen:\n${ indentString(codes) }`)
   try {
     return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString().trim()
   } catch (error) {
