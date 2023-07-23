@@ -127,20 +127,45 @@ function parseGithubComment(comment) {
   const tokens = marked.Lexer.lex(comment)
   let result = ""
   for (const token of tokens) {
-    if (token.type === 'code' && token.text.trim().length > 0) {
-      console.log("------------------------------>token.lang\t", token.lang)
+    if (token.type === 'code' && token.text.length > 0 && token.lang !== undefined) {
       if (token.lang === 'nim') {
         result = token.text.trim()
-        result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
+        result = result.split('\n').filter(line => line.trim() !== '').join('\n')
+      } else if (token.lang === 'c') {
+        const xtraFile = `${ process.cwd() }/temp.c`
+        if (!fs.existsSync(xtraFile)) {
+          fs.writeFileSync(xtraFile, token.text.trim())
+          fs.chmodSync(xtraFile, "444")
+        }
+      } else if (token.lang === 'cpp' || token.lang === 'c++') {
+        const xtraFile = `${ process.cwd() }/temp.cpp`
+        if (!fs.existsSync(xtraFile)) {
+          fs.writeFileSync(xtraFile, token.text.trim())
+          fs.chmodSync(xtraFile, "444")
+        }
+      } else if (token.lang === 'h' || token.lang === 'hpp') {
+        const xtraFile = `${ process.cwd() }/temp.h`
+        if (!fs.existsSync(xtraFile)) {
+          fs.writeFileSync(xtraFile, token.text.trim())
+          fs.chmodSync(xtraFile, "444")
+        }
+      } else if (token.lang === 'js' || token.lang === 'javascript') {
+        const xtraFile = `${ process.cwd() }/temp.js`
+        if (!fs.existsSync(xtraFile)) {
+          fs.writeFileSync(xtraFile, token.text.trim())
+          fs.chmodSync(xtraFile, "444")
+        }
+      } else if (token.lang === 'cfg' || token.lang === 'ini') {
+        const xtraFile = `${ temporaryFile }.cfg`
+        if (!fs.existsSync(xtraFile)) {
+          fs.writeFileSync(xtraFile, token.text.trim())
+          fs.chmodSync(xtraFile, "444")
+        }
       }
-      // if (token.lang === 'nim') {
-      //   // result[1] = token.text.trim()
-      // }
-
     }
   }
   return result
-};
+}
 
 
 function parseGithubCommand(comment) {
