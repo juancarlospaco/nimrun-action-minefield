@@ -16,7 +16,7 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const extraFlags       = " -d:useMalloc -d:nimAllocPagesViaMalloc -d:strip -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
+const extraFlags       = " -d:useMalloc -d:strip -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
 const debugGodModes    = ["araq"]
@@ -183,10 +183,19 @@ function parseGithubCommand(comment) {
   if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js")) {
     if (result.startsWith("!nim js")) {
       result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen --run "
+    } else if (result.includes("--gc:arc") || result.includes("--gc:orc") || result.includes("--gc:atomicArc")) {
+      // If ARC or ORC then add " -d:nimAllocPagesViaMalloc --expandArc:main " for Valgrind.
+      result = result + " -d:nimAllocPagesViaMalloc --expandArc:main "
     }
     result = result + extraFlags + preparedFlags
     if (result.startsWith("!nim c") || result.startsWith("!nim cpp")) {
-      result = result + ` && valgrind --undef-value-errors=no --leak-check=full ${temporaryOutFile}`
+      // If Valgrind is installed, then use Valgrind, else just run it.
+      if (fs.existsSync("valgrind")) {
+        result = result + ` && valgrind --leak-check=full --undef-value-errors=no ${temporaryOutFile}`
+      } else {
+        console.warn("Valgrind not found, must be installed to check for memory leaks.")
+        result = result + ` && ${temporaryOutFile}`
+      }
     }
     result = result.substring(1) // Remove the leading "!"
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
@@ -371,7 +380,7 @@ ${ tripleBackticks }\n
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
-<li><b>Commands</b>\t<code>${ cmd.replace(preparedFlags, "").trim() }</code></ul>\n`
+<li><b>Commands</b>\t<code>${ cmd }</code></ul>\n`
           // Iff NOT Ok add AST and IR info for debugging purposes.
           if (!isOk) {
             issueCommentStr += `
