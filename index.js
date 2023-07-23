@@ -15,8 +15,8 @@ const temporaryFile    = `${ process.cwd() }/temp.nim`
 const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
-const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile} `
-const extraFlags       = " --run -d:strip -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
+const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
+const extraFlags       = " -d:useMalloc -d:nimAllocPagesViaMalloc -d:strip -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
 const debugGodModes    = ["araq"]
@@ -182,9 +182,12 @@ function parseGithubCommand(comment) {
   }
   if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js")) {
     if (result.startsWith("!nim js")) {
-      result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen "
+      result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen --run "
     }
     result = result + extraFlags + preparedFlags
+    if (result.startsWith("!nim c") || result.startsWith("!nim cpp")) {
+      result = result + ` && valgrind --undef-value-errors=no --leak-check=full ${temporaryOutFile}`
+    }
     result = result.substring(1) // Remove the leading "!"
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
     return result.trim()
