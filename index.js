@@ -340,8 +340,8 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
         const githubComment = context.payload.comment.body.trim()
         const codes         = parseGithubComment(githubComment)
         const cmd           = parseGithubCommand(githubComment)
-        let fails           = null
-        let works           = null
+        let fails           = "devel"
+        let works           = "stable"
         let commitsLen      = nimFinalVersions.length
         let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
         // Check the same code agaisnt all versions of Nim from devel to 1.0
@@ -352,10 +352,10 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const finished = new Date()
           const thumbsUp = (isOk ? "\t:+1: OK" : "\t:-1: FAIL")
           // Remember which version works and which version breaks.
-          if (isOk && works === null) {
+          if (isOk && works === "stable") {
             works = semver
           }
-          else if (!isOk && fails === null) {
+          else if (!isOk && fails === "devel") {
             fails = semver
           }
           // Append to reports.
