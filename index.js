@@ -16,10 +16,9 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const extraFlags       = " -d:useMalloc -d:nimArcDebug -d:nimArcIds -d:nimDebugDlOpen -d:stacktraceMsgs -d:nimCompilerStacktraceHints -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --debuginfo:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
+const extraFlags       = " -d:useMalloc -d:strip -d:nimArcDebug -d:nimArcIds -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
-const choosenimNoAnal  = {...process.env, env: {CHOOSENIM_NO_ANALYTICS: "1"}}
-const valgrindLeakChck = {...process.env, env: {VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --error-exitcode=1 --num-callers=9 --error-limit=9 --max-threads=99"}}
+const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
 const debugGodModes    = ["araq"]
 const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
 const commentPrefix = "!nim "
@@ -192,7 +191,7 @@ function parseGithubCommand(comment) {
     result = result + extraFlags + preparedFlags
     if (result.startsWith("!nim c") || result.startsWith("!nim cpp")) {
       // If Valgrind is installed, then use Valgrind, else just run it.
-      result = result + ` && valgrind ${temporaryOutFile}`
+      result = result + ` && valgrind --leak-check=full --undef-value-errors=no --show-error-list=yes ${temporaryOutFile}`
     }
     result = result.substring(1) // Remove the leading "!"
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
@@ -231,7 +230,7 @@ function executeNim(cmd, codes) {
   }
   console.log("COMMAND:\t", cmd)
   try {
-    return [true, execSync(cmd, valgrindLeakChck).toString().trim()]
+    return [true, execSync(cmd).toString().trim()]
   } catch (error) {
     console.warn(error)
     return [false, `${error}`]
@@ -376,7 +375,7 @@ ${ tripleBackticks }\n
 <li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
-<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(2)) }</code>
+<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul>\n`
           // Iff NOT Ok add AST and IR info for debugging purposes.
           if (!isOk) {
@@ -468,7 +467,7 @@ ${commitsNear}
         else { console.warn("works and fails not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
         // Report results back as a comment on the issue.
         const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
-        issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(2)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
+        issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         addIssueComment(githubClient, issueCommentStr)
     }
     else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
