@@ -16,9 +16,10 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const extraFlags       = " -d:useMalloc -d:strip -d:nimArcDebug -d:nimArcIds -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
+const extraFlags       = " -d:useMalloc -d:nimArcDebug -d:nimArcIds -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
+const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --num-callers=9"}}
 const debugGodModes    = ["araq"]
 const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
 const commentPrefix = "!nim "
@@ -191,7 +192,7 @@ function parseGithubCommand(comment) {
     result = result + extraFlags + preparedFlags
     if (result.startsWith("!nim c") || result.startsWith("!nim cpp")) {
       // If Valgrind is installed, then use Valgrind, else just run it.
-      result = result + ` && valgrind --leak-check=full --undef-value-errors=no --show-error-list=yes ${temporaryOutFile}`
+      result = result + ` && valgrind ${temporaryOutFile}`
     }
     result = result.substring(1) // Remove the leading "!"
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
@@ -230,7 +231,7 @@ function executeNim(cmd, codes) {
   }
   console.log("COMMAND:\t", cmd)
   try {
-    return [true, execSync(cmd).toString().trim()]
+    return [true, execSync(cmd, valgrindLeakChck).toString().trim()]
   } catch (error) {
     console.warn(error)
     return [false, `${error}`]
