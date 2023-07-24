@@ -190,12 +190,7 @@ function parseGithubCommand(comment) {
     result = result + extraFlags + preparedFlags
     if (result.startsWith("!nim c") || result.startsWith("!nim cpp")) {
       // If Valgrind is installed, then use Valgrind, else just run it.
-      if (fs.accessSync("valgrind", fs.constants.F_OK | fs.constants.X_OK)) {
-        result = result + ` && valgrind --leak-check=full --undef-value-errors=no ${temporaryOutFile}`
-      } else {
-        console.warn("Valgrind not found, must be installed to check for memory leaks.")
-        result = result + ` && ${temporaryOutFile}`
-      }
+      result = result + ` && valgrind --leak-check=full --undef-value-errors=no ${temporaryOutFile}`
     }
     result = result.substring(1) // Remove the leading "!"
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
