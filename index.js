@@ -184,13 +184,14 @@ function parseGithubCommand(comment) {
     if (result.startsWith("!nim js")) {
       result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen --run "
     } else if (result.includes("--gc:arc") || result.includes("--gc:orc") || result.includes("--gc:atomicArc")) {
-      // If ARC or ORC then add " -d:nimAllocPagesViaMalloc --expandArc:main " for Valgrind.
-      result = result + " -d:nimAllocPagesViaMalloc --expandArc:main "
+      // If ARC or ORC then add " -d:nimAllocPagesViaMalloc " for Valgrind.
+      // "--expandArc:main" can not be used because it was added last.
+      result = result + " -d:nimAllocPagesViaMalloc "
     }
     result = result + extraFlags + preparedFlags
     if (result.startsWith("!nim c") || result.startsWith("!nim cpp")) {
       // If Valgrind is installed, then use Valgrind, else just run it.
-      result = result + ` && valgrind --leak-check=full --undef-value-errors=no ${temporaryOutFile}`
+      result = result + ` && valgrind --leak-check=full --undef-value-errors=no --show-error-list=yes ${temporaryOutFile}`
     }
     result = result.substring(1) // Remove the leading "!"
     console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
