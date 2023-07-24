@@ -16,7 +16,7 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const extraFlags       = " -d:useMalloc -d:nimArcDebug -d:nimArcIds -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
+const extraFlags       = " -d:useMalloc -d:nimArcDebug -d:nimArcIds -d:nimDebugDlOpen -d:stacktraceMsgs -d:nimCompilerStacktraceHints -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --debuginfo:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: '1'}}
 const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --num-callers=9"}}
