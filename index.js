@@ -376,7 +376,7 @@ ${ tripleBackticks }\n
 <li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
-<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(0)) }</code>
+<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000).toFixed(2)) }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul>\n`
           // Iff NOT Ok add AST and IR info for debugging purposes.
           if (!isOk) {
@@ -468,7 +468,7 @@ ${commitsNear}
         else { console.warn("works and fails not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
         // Report results back as a comment on the issue.
         const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
-        issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(0)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
+        issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration.toFixed(2)) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         addIssueComment(githubClient, issueCommentStr)
     }
     else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
