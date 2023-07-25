@@ -67,13 +67,14 @@ function formatDuration(seconds) {
 
 function formatSizeUnits(bytes) {
   console.assert(typeof bytes === "number", `bytes must be number, but got ${ typeof bytes }`)
+  const bites = ` (${ bytes.toLocaleString() } bytes)`
   if      (bytes >= 1073741824) { bytes = (bytes / 1073741824).toFixed(2) + " Gb"; }
   else if (bytes >= 1048576)    { bytes = (bytes / 1048576).toFixed(2) + " Mb"; }
   else if (bytes >= 1024)       { bytes = (bytes / 1024).toFixed(2) + " Kb"; }
   else if (bytes >  1)          { bytes = bytes + " bytes"; }
   else if (bytes == 1)          { bytes = bytes + " byte"; }
   else                          { bytes = "0 bytes"; }
-  return bytes;
+  return bytes + bites;
 }
 
 
@@ -381,7 +382,7 @@ ${ tripleBackticks }\n
           // Iff NOT Ok add AST and IR info for debugging purposes.
           if (!isOk) {
             issueCommentStr += `
-<h3>IR</h3><b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
+<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
 ${ tripleBackticks }\n
