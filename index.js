@@ -350,7 +350,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
         const codes         = parseGithubComment(githubComment)
         const cmd           = parseGithubCommand(githubComment)
         let fails           = "devel"
-        let works           = "stable"
+        let works           = null
         let commitsLen      = nimFinalVersions.length
         let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
         // Check the same code agaisnt all versions of Nim from devel to 1.0
@@ -361,7 +361,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const finished = new Date()
           const thumbsUp = (isOk ? "\t:+1: OK" : "\t:-1: FAIL")
           // Remember which version works and which version breaks.
-          if (isOk && works === "stable") {
+          if (isOk && works === null) {
             works = semver
           }
           else if (!isOk && fails === "devel") {
@@ -395,7 +395,7 @@ ${ tripleBackticks }\n`
 
 
         // This part is about finding the specific commit that breaks
-        if (works !== null && fails !== null) {
+        if (works !== null) {
           // Get a range of commits between "FAILS..WORKS"
           gitInit()
           const failsCommit = gitCommitForVersion(fails)
