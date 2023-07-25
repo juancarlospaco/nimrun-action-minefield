@@ -40,11 +40,11 @@ const indentString = (str, count = 2, indent = ' ') => {
 
 function formatDuration(seconds) {
   if (typeof seconds === "string") {
-    seconds = parseInt(seconds)
+    seconds = parseInt(seconds, 10)
   }
   console.assert(typeof seconds === "number", `seconds must be number, but got ${ typeof seconds }`)
   let result = "now"
-  if (seconds > 0) {
+  if (!isNaN(seconds) && seconds > 0) {
       const hours   = Math.floor(((seconds % 31536000) % 86400) / 3600);
       const minutes = Math.floor(((seconds % 31536000) % 86400) %  60);
       const second  = (((seconds % 31536000) % 86400)  % 3600)  % 0;
