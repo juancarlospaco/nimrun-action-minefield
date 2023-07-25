@@ -43,23 +43,15 @@ function formatDuration(seconds) {
     seconds = parseInt(seconds)
   }
   console.assert(typeof seconds === "number", `seconds must be number, but got ${ typeof seconds }`)
-  function numberEnding(number) {
-    return (number > 1) ? 's' : '';
-  }
   let result = "now"
   if (seconds > 0) {
-      const segundo = ` (${ seconds.toLocaleString() } seconds)`
-      const years   = Math.floor(seconds   / 31536000);
-      const days    = Math.floor((seconds  % 31536000) / 86400);
       const hours   = Math.floor(((seconds % 31536000) % 86400) / 3600);
       const minutes = Math.floor(((seconds % 31536000) % 86400) %  60);
       const second  = (((seconds % 31536000) % 86400)  % 3600)  % 0;
-      const r = (years   > 0) ? years   + " year"   + numberEnding(years)   : "";
-      const x = (days    > 0) ? days    + " day"    + numberEnding(days)    : "";
-      const y = (hours   > 0) ? hours   + " hour"   + numberEnding(hours)   : "";
-      const z = (minutes > 0) ? minutes + " minute" + numberEnding(minutes) : "";
-      const u = (second  > 0) ? second  + " second" + numberEnding(second)  : "";
-      result = r + x + y + z + u + segundo
+      const y = (hours   > 0) ? hours   + " hours"   : "";
+      const z = (minutes > 0) ? minutes + " minutes" : "";
+      const u = (second  > 0) ? second  + " seconds" : "";
+      result = y + z + u
   }
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result
