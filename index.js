@@ -16,7 +16,7 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const extraFlags       = " -d:useMalloc -d:nimArcDebug -d:nimArcIds -d:nimDebugDlOpen -d:stacktraceMsgs -d:nimCompilerStacktraceHints -d:ssl -d:nimDisableCertificateValidation --debugger:native --forceBuild:on --debuginfo:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
+const extraFlags       = " -d:nimDebugDlOpen -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
 const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOURCE_DATE_EPOCH: Math.floor(Date.now() / 1000).toString()}}  // SOURCE_DATE_EPOCH is same in all runs.
 const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
@@ -85,6 +85,20 @@ function checkAuthorAssociation() {
   console.assert(typeof result === "boolean", `result must be boolean, but got ${ typeof result }`)
   return result
 };
+
+
+function hasArc(cmd) {
+  console.assert(typeof cmd === "string", `cmd must be string, but got ${ typeof cmd }`)
+  const s = cmd.trim().toLowerCase()
+  return (s.includes("--gc:arc") || s.includes("--gc:orc") || s.includes("--gc:atomicarc") || s.includes("--mm:arc") || s.includes("--mm:orc") || s.includes("--mm:atomicarc"))
+}
+
+
+function hasMalloc(cmd) {
+  console.assert(typeof cmd === "string", `cmd must be string, but got ${ typeof cmd }`)
+  const s = cmd.trim().toLowerCase()
+  return (s.includes("-d:usemalloc") || s.includes("--define:usemalloc"))
+}
 
 
 async function checkCollaboratorPermissionLevel(githubClient, levels) {
@@ -171,29 +185,33 @@ function parseGithubComment(comment) {
 function parseGithubCommand(comment) {
   console.assert(typeof comment === "string", `comment must be string, but got ${ typeof comment }`)
   let result = comment.trim().split("\n")[0].trim()
+  // Basic checkings
   const bannedSeps = [";", "&&", "||"]
   if (bannedSeps.some(s => result.includes(s))) {
     core.setFailed(`Github comment must not contain ${bannedSeps}`)
   }
-  if (result.startsWith("!nim c") || result.startsWith("!nim cpp") || result.startsWith("!nim js")) {
-    if (result.startsWith("!nim js")) {
-      result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen --run "
-    } else if (result.includes("--gc:arc") || result.includes("--gc:orc") || result.includes("--gc:atomicArc")) {
-      // If ARC or ORC then add " -d:nimAllocPagesViaMalloc " for Valgrind.
-      // "--expandArc:main" can not be used because it was added last.
-      result = result + " -d:nimAllocPagesViaMalloc "
-    }
-    result = result + extraFlags + preparedFlags
-    if (result.startsWith("!nim c") || result.startsWith("!nim cpp")) {
-      // If Valgrind is installed, then use Valgrind, else just run it.
-      result = result + ` && valgrind ${temporaryOutFile}`
-    }
-    result = result.substring(1) // Remove the leading "!"
-    console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
-    return result.trim()
-  } else {
+  if (!result.startsWith("!nim c") && !result.startsWith("!nim cpp") && !result.startsWith("!nim js")) {
     core.setFailed("Github comment must start with '!nim c' or '!nim cpp' or '!nim js'")
   }
+  // Extra arguments based on different targets
+  if (result.startsWith("!nim js")) {
+    result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen -d:nimExperimentalJsfetch "
+  }
+  if (hasArc(result)) {
+    result = result + " -d:nimArcDebug -d:nimArcIds "
+  }
+  if (hasMalloc(result)) {
+    result = result + " -d:nimAllocPagesViaMalloc --debugger:native --debuginfo:on "
+  } else {
+    result = result + " --run "
+  }
+  result = result + extraFlags + preparedFlags
+  if (hasMalloc(result)) {
+    result = result + ` && valgrind ${temporaryOutFile}`
+  }
+  result = result.substring(1) // Remove the leading "!"
+  console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
+  return result.trim()
 };
 
 
