@@ -499,7 +499,7 @@ ${commitsNear}
 <li><b>Commands</b>\t<code>${ cmd }</code></ul>
 </ul>\n\n
 ${ tripleBackticks }
-${ context.payload.comment }
+${ JSON.stringify(context.payload) }
 ${ tripleBackticks }
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         addIssueComment(githubClient, issueCommentStr)
