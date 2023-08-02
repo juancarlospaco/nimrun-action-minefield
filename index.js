@@ -383,7 +383,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const started  = new Date()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
-          const thumbsUp = (isOk ? " $\\color{green}\\textbf{\\large OK}$ " : " $\\color{red}\\textbf{\\large FAIL}$ ")
+          const thumbsUp = (isOk ? " :+1: $\\color{green}\\textbf{\\large OK}$ " : " :-1: $\\color{red}\\textbf{\\large FAIL}$ ")
           // Remember which version works and which version breaks.
           if (isOk && works === null) {
             works = semver
@@ -490,7 +490,7 @@ ${commitsNear}
         // Report results back as a comment on the issue.
         const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
         const v = versionInfos()
-        issueCommentStr += `<details><summary>Global Stats</summary><ul>
+        issueCommentStr += `<details><summary>Stats</summary><ul>
 <li><b>GCC     </b>\t<code>${ v[0] }</code>
 <li><b>LibC    </b>\t<code>${ v[1] }</code>
 <li><b>Valgrind</b>\t<code>${ v[2] }</code>
