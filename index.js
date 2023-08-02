@@ -101,6 +101,16 @@ function hasMalloc(cmd) {
 }
 
 
+function versionInfos() {
+  return [
+    execSync("gcc --version").toString().split("\n")[0].trim(),
+    execSync("ldd --version").toString().split("\n")[0].trim(),
+    execSync("valgrind --version").toString().split("\n")[0].trim(),
+    execSync("node --version").toString().split("\n")[0].trim(),
+  ]
+}
+
+
 async function checkCollaboratorPermissionLevel(githubClient, levels) {
   const permissionRes = await githubClient.repos.getCollaboratorPermissionLevel({
     owner   : context.repo.owner,
@@ -382,16 +392,14 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
             fails = semver
           }
           // Append to reports.
-          issueCommentStr += `<details><summary>${semver}\t${thumbsUp}</summary><h3>Output</h3>\n
+          issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
 ${output}
 ${ tripleBackticks }\n
 <h3>Stats</h3><ul>
-<li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
-<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul>\n`
+<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
           // Iff NOT Ok add AST and IR info for debugging purposes.
           if (!isOk) {
             issueCommentStr += `
@@ -451,9 +459,8 @@ ${ tripleBackticks }\n`
                 const breakingCommit = (index > 0) ? commits[index - 1] : commits[index]
                 const [user, mesage, date, files] = gitMetadata(breakingCommit)
                 const comit = breakingCommit.replace('"', '')
-
                 // Report the breaking commit diagnostics
-                issueCommentStr += `<details><summary>${comit} :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
+                issueCommentStr += `<details><summary><kbd>${comit}</kbd> :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
 ${user} introduced a bug at <code>${date}</code> on commit <a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ comit }</a> with message:\n
 ${ tripleBackticks }
 ${mesage}
@@ -464,7 +471,7 @@ ${files}
 ${ tripleBackticks }
 \nThe bug can be in the commits:\n
 ${commitsNear}
-(Diagnostics sometimes off-by-one).\n</details>\n`
+(Diagnostics sometimes off-by-one).</details>\n`
                 // Break out of the for
                 break
               }
@@ -482,7 +489,13 @@ ${commitsNear}
         else { console.warn("works and fails not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
         // Report results back as a comment on the issue.
         const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
-        issueCommentStr += `:robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
+        const v = versionInfos()
+        issueCommentStr += `<h3>Global Stats</h3><ul>
+<li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
+<li><b>Commands</b>\t<code>${ cmd }</code></ul>
+<li><b>Versions</b>\tGCC <code>${v[0]}</code>\tLibC <code>${v[1]}</code>\tValgrind <code>${v[2]}</code>\tNodeJS </code>${v[3]}</code></ul>
+</ul>\n\n
+:robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         addIssueComment(githubClient, issueCommentStr)
     }
     else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
