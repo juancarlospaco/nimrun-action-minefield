@@ -17,7 +17,7 @@ const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const preparedFlags    = ` --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
 const extraFlags       = " -d:nimDebugDlOpen -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --warnings:off --lineTrace:off "
-const nimFinalVersions = ["devel", "stable", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
+const nimFinalVersions = ["devel", "stable", "2.0.0", "1.6.0", "1.4.0", "1.2.0", "1.0.0", "0.20.2"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOURCE_DATE_EPOCH: Math.floor(Date.now() / 1000).toString()}}  // SOURCE_DATE_EPOCH is same in all runs.
 const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 const debugGodModes    = ["araq"]
@@ -103,10 +103,10 @@ function hasMalloc(cmd) {
 
 function versionInfos() {
   return [
-    execSync("gcc --version").toString().split("\n")[0].trim(),
-    execSync("ldd --version").toString().split("\n")[0].trim(),
-    execSync("valgrind --version").toString().split("\n")[0].trim(),
-    execSync("node --version").toString().split("\n")[0].trim(),
+    execSync("gcc --version").toString().split("\n")[0].trim().replace("gcc", ""),
+    execSync("ldd --version").toString().split("\n")[0].trim().replace("ldd", ""),
+    execSync("valgrind --version").toString().split("\n")[0].trim().replace("valgrind-", ""),
+    execSync("node --version").toString().split("\n")[0].trim().replace("v", ""),
   ]
 }
 
@@ -383,7 +383,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const started  = new Date()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
-          const thumbsUp = (isOk ? "\t:+1: OK" : "\t:-1: FAIL")
+          const thumbsUp = (isOk ? "\t$\color{green}\textbf{\large\&#x24D8; OK}$" : "\t$\color{red}\textbf{\large\&#x26A0; FAIL}$")
           // Remember which version works and which version breaks.
           if (isOk && works === null) {
             works = semver
