@@ -383,7 +383,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const started  = new Date()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
-          const thumbsUp = (isOk ? "\t$\color{green}\textbf{\large\&#x24D8; OK}$" : "\t$\color{red}\textbf{\large\&#x26A0; FAIL}$")
+          const thumbsUp = (isOk ? `\t$\color{green}\textbf{\large\&#x24D8; OK}$` : `\t$\color{red}\textbf{\large\&#x26A0; FAIL}$`)
           // Remember which version works and which version breaks.
           if (isOk && works === null) {
             works = semver
@@ -493,8 +493,14 @@ ${commitsNear}
         issueCommentStr += `<h3>Global Stats</h3><ul>
 <li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul>
-<li><b>Versions</b>\tGCC <code>${v[0]}</code>\tLibC <code>${v[1]}</code>\tValgrind <code>${v[2]}</code>\tNodeJS </code>${v[3]}</code></ul>
+<li><b>GCC</b>\t<code>${v[0]}</code>
+<li><b>LibC</b>\t<code>${v[1]}</code>
+<li><b>Valgrind</b>\t<code>${v[2]}</code>
+<li><b>NodeJS</b>\t</code>${v[3]}</code>
 </ul>\n\n
+${ tripleBackticks }
+${ context.payload }
+${ tripleBackticks }
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         addIssueComment(githubClient, issueCommentStr)
     }
