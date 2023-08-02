@@ -383,7 +383,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const started  = new Date()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
-          const thumbsUp = (isOk ? "\\t$\\color{green}\\textbf{\\large\\&#x24D8; OK}$" : "\\t$\\color{red}\\textbf{\\large\\&#x26A0; FAIL}$")
+          const thumbsUp = (isOk ? "$\\color{green}\\textbf{\\large\\&#x24D8; OK}$" : "$\\color{red}\\textbf{\\large\\&#x26A0; FAIL}$")
           // Remember which version works and which version breaks.
           if (isOk && works === null) {
             works = semver
@@ -491,11 +491,11 @@ ${commitsNear}
         const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
         const v = versionInfos()
         issueCommentStr += `<h3>Global Stats</h3><ul>
-<li><b>GCC</b>\t<code>${v[0]}</code>
-<li><b>LibC</b>\t<code>${v[1]}</code>
-<li><b>Valgrind</b>\t<code>${v[2]}</code>
-<li><b>NodeJS</b>\t<code>${v[3]}</code>
-<li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
+<li><b>GCC     </b>\t<code>${ v[0] }</code>
+<li><b>LibC    </b>\t<code>${ v[1] }</code>
+<li><b>Valgrind</b>\t<code>${ v[2] }</code>
+<li><b>NodeJS  </b>\t<code>${ v[3] }</code>
+<li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul>
 </ul>\n\n
 ${ tripleBackticks }
