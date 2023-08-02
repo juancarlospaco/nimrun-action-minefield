@@ -383,7 +383,8 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const started  = new Date()
           let [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
-          const thumbsUp = (isOk ? " :+1: $\\color{green}\\textbf{\\large OK}$ " : " :-1: $\\color{red}\\textbf{\\large FAIL}$ ")
+          // const thumbsUp = (isOk ? " :+1: $\\color{green}\\textbf{\\large OK}$ " : " :-1: $\\color{red}\\textbf{\\large FAIL}$ ")
+          const thumbsUp = (isOk ? " :+1: $\\color{green}\\textbf{\\large OK}$ " : " :-1: FAIL ")
           // Remember which version works and which version breaks.
           if (isOk && works === null) {
             works = semver
