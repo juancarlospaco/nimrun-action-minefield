@@ -492,11 +492,11 @@ ${commitsNear}
         const v = versionInfos()
         issueCommentStr += `<h3>Global Stats</h3><ul>
 <li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul>
 <li><b>GCC</b>\t<code>${v[0]}</code>
 <li><b>LibC</b>\t<code>${v[1]}</code>
 <li><b>Valgrind</b>\t<code>${v[2]}</code>
 <li><b>NodeJS</b>\t</code>${v[3]}</code>
+<li><b>Commands</b>\t<code>${ cmd }</code></ul>
 </ul>\n\n
 ${ tripleBackticks }
 ${ context.payload }
