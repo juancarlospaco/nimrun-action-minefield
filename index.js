@@ -381,7 +381,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
         for (let semver of nimFinalVersions) {
           console.log(executeChoosenim(semver))
           const started  = new Date()
-          const [isOk, output] = executeNim(cmd, codes)
+          let [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
           const thumbsUp = (isOk ? " :+1: $\\color{green}\\textbf{\\large OK}$ " : " :-1: $\\color{red}\\textbf{\\large FAIL}$ ")
           // Remember which version works and which version breaks.
@@ -394,7 +394,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           // Append to reports.
           issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${output}
+${ output.replace(/^==\d+== /gm, '') }
 ${ tripleBackticks }\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
