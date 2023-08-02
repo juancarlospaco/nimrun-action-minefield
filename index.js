@@ -289,7 +289,7 @@ function getIR() {
   }
   // Clean outs
   result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
-  result = result.replace(/\/\*[\s\S]*?\*\//g, '')                          // Remove comments
+  result = result.replace(/\/\*[\s\S]*?\*\//g, '').trim()                   // Remove comments
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result
 }
@@ -394,7 +394,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           // Append to reports.
           issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.replace(/^==\d+== /gm, '') }
+${ output.replace(/^==\d+== /gm, '').trim() }
 ${ tripleBackticks }\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
