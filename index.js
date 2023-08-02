@@ -211,7 +211,7 @@ function parseGithubCommand(comment) {
     result = result + " -d:nimArcDebug -d:nimArcIds "
   }
   if (hasMalloc(result)) {
-    result = result + " -d:nimAllocPagesViaMalloc --debugger:native --debuginfo:on "
+    result = result + " -d:nimAllocPagesViaMalloc -d:useSysAssert -d:useGcAssert -d:nimLeakDetector --debugger:native --debuginfo:on "
   } else {
     result = result + " --run "
   }
@@ -490,14 +490,14 @@ ${commitsNear}
         // Report results back as a comment on the issue.
         const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
         const v = versionInfos()
-        issueCommentStr += `<h3>Global Stats</h3><ul>
+        issueCommentStr += `<details><summary>Global Stats</summary><ul>
 <li><b>GCC     </b>\t<code>${ v[0] }</code>
 <li><b>LibC    </b>\t<code>${ v[1] }</code>
 <li><b>Valgrind</b>\t<code>${ v[2] }</code>
 <li><b>NodeJS  </b>\t<code>${ v[3] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
-<li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul>\n\n
+<li><b>Issue Comments</b>\t<code>${ context.payload.issue.comments }</code>
+<li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         addIssueComment(githubClient, issueCommentStr)
     }
