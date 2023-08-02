@@ -496,11 +496,8 @@ ${commitsNear}
 <li><b>Valgrind</b>\t<code>${ v[2] }</code>
 <li><b>NodeJS  </b>\t<code>${ v[3] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul>
-</ul>\n\n
-${ tripleBackticks }
-${ JSON.stringify(context.payload) }
-${ tripleBackticks }
+<li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
+<li><b>Commands</b>\t<code>${ cmd }</code></ul>\n\n
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
         addIssueComment(githubClient, issueCommentStr)
     }
