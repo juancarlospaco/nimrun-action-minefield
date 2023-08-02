@@ -103,10 +103,10 @@ function hasMalloc(cmd) {
 
 function versionInfos() {
   return [
-    execSync("gcc --version").toString().split("\n")[0].trim().replace("gcc", ""),
-    execSync("ldd --version").toString().split("\n")[0].trim().replace("ldd", ""),
-    execSync("valgrind --version").toString().split("\n")[0].trim().replace("valgrind-", ""),
-    execSync("node --version").toString().split("\n")[0].trim().replace("v", ""),
+    execSync("gcc --version").toString().split("\n")[0].replace("gcc", "").trim(),
+    execSync("ldd --version").toString().split("\n")[0].replace("ldd", "").trim(),
+    execSync("valgrind --version").toString().split("\n")[0].replace("valgrind-", "").trim(),
+    execSync("node --version").toString().split("\n")[0].replace("v", "").trim(),
   ]
 }
 
@@ -383,7 +383,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const started  = new Date()
           const [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
-          const thumbsUp = (isOk ? `\t$\color{green}\textbf{\large\&#x24D8; OK}$` : `\t$\color{red}\textbf{\large\&#x26A0; FAIL}$`)
+          const thumbsUp = (isOk ? "\\t$\\color{green}\\textbf{\\large\\&#x24D8; OK}$" : "\\t$\\color{red}\\textbf{\\large\\&#x26A0; FAIL}$")
           // Remember which version works and which version breaks.
           if (isOk && works === null) {
             works = semver
