@@ -107,6 +107,7 @@ function versionInfos() {
     execSync("ldd --version").toString().split("\n")[0].replace("ldd", "").trim(),
     execSync("valgrind --version").toString().split("\n")[0].replace("valgrind-", "").trim(),
     execSync("node --version").toString().split("\n")[0].replace("v", "").trim(),
+    execSync("uname --kernel-release").toString().split("\n")[0].replace("v", "").trim(),
   ]
 }
 
@@ -383,7 +384,6 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
           const started  = new Date()
           let [isOk, output] = executeNim(cmd, codes)
           const finished = new Date()
-          // const thumbsUp = (isOk ? " :+1: $\\color{green}\\textbf{\\large OK}$ " : " :-1: $\\color{red}\\textbf{\\large FAIL}$ ")
           const thumbsUp = (isOk ? " :+1: $\\color{green}\\textbf{\\large OK}$ " : " :-1: FAIL ")
           // Remember which version works and which version breaks.
           if (isOk && works === null) {
@@ -496,6 +496,7 @@ ${commitsNear}
 <li><b>LibC    </b>\t<code>${ v[1] }</code>
 <li><b>Valgrind</b>\t<code>${ v[2] }</code>
 <li><b>NodeJS  </b>\t<code>${ v[3] }</code>
+<li><b>Linux   </b>\t<code>${ v[4] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Issue Comments</b>\t<code>${ context.payload.issue.comments }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
