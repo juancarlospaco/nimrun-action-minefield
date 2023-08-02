@@ -107,7 +107,7 @@ function versionInfos() {
     execSync("ldd --version").toString().split("\n")[0].replace("ldd", "").trim(),
     execSync("valgrind --version").toString().split("\n")[0].replace("valgrind-", "").trim(),
     execSync("node --version").toString().split("\n")[0].replace("v", "").trim(),
-    execSync("uname --kernel-release").toString().split("\n")[0].replace("v", "").trim(),
+    execSync("uname --kernel-release").toString().split("\n")[0].replace("azure", "").trim(),
   ]
 }
 
