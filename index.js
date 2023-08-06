@@ -177,16 +177,18 @@ function parseGithubCommand(comment) {
   if (result.startsWith("!nim js")) {
     result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen -d:nimExperimentalJsfetch "
   }
-  if (hasArc(result)) {
+  const useArc      = hasArc(result)
+  const useValgrind = useArc && hasMalloc(result)
+  if (useArc) {
     result = result + " -d:nimArcDebug -d:nimArcIds "
   }
-  if (hasMalloc(result)) {
+  if (useValgrind) {
     result = result + " -d:nimAllocPagesViaMalloc -d:useSysAssert -d:useGcAssert -d:nimLeakDetector --debugger:native --debuginfo:on "
   } else {
     result = result + " --run "
   }
   result = result + extraFlags
-  if (hasMalloc(result)) {
+  if (useValgrind) {
     result = result + ` && valgrind ${temporaryOutFile}`
   }
   result = result.substring(1) // Remove the leading "!"
@@ -342,7 +344,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
     const githubComment = context.payload.comment.body.trim()
     const codes         = parseGithubComment(githubComment)
     const cmd           = parseGithubCommand(githubComment)
-    let fails           = "devel"
+    let fails           = null
     let works           = null
     let commitsLen      = nimFinalVersions.length
     let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
@@ -357,7 +359,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
       if (isOk && works === null) {
         works = semver
       }
-      else if (!isOk && fails === "devel") {
+      else if (!isOk && fails === null) {
         fails = semver
       }
       // Append to reports.
@@ -386,7 +388,7 @@ ${ tripleBackticks }\n`
 
 
     // This part is about finding the specific commit that breaks
-    if (works !== null) {
+    if (fails !== null && works !== null) {
       // Get a range of commits between "FAILS..WORKS"
       gitInit()
       const failsCommit = gitCommitForVersion(fails)
