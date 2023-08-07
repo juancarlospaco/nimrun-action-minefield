@@ -78,7 +78,7 @@ function fuzzInt8() {
 
 
 function fuzzUint64() {
-  return shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807n, 18446744073709551615n])[0]
+  return shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807n, 18446744073709551614n])[0]
 }
 
 
@@ -150,7 +150,7 @@ function fuzz() {
   fuzzUint16*  : uint16   = uint16(  ${ fuzzUint16() })
   fuzzUint8*   : uint8    = uint8(   ${ fuzzUint8()  })
   fuzzByte*    : byte     = byte(    ${ fuzzUint8()  })
-  fuzzPositive*: Positive = Positive(${ fuzzUint32() })
+  fuzzPositive*: Positive = Positive(${ fuzzUint32() } + 1)
   fuzzNatural* : Natural  = Natural( ${ fuzzUint32() })
   fuzzString*  : string   = string(  ${ fuzzString() })
   fuzzChar*    : char     = char(    ${ fuzzChar()   })
