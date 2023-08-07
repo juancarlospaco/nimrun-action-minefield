@@ -36,8 +36,7 @@ function shuffleArray(arrai) {
   console.assert(arrai.length > 0, `arrai must not be empty array, but got ${ arrai }`)
   const result = [...arrai]
   for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    [result[i], result[j]] = [result[j], result[i]]
+    [result[i], result[Math.floor(Math.random() * (i + 1))]] = [result[Math.floor(Math.random() * (i + 1))], result[i]]
   }
   return result
 }
