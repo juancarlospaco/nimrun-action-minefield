@@ -57,11 +57,6 @@ function fuzzInt64() {
 }
 
 
-function fuzzInt() {
-  return fuzzInt64()
-}
-
-
 function fuzzInt32() {
   return shuffleArray([-2147483648, -32768, -128, 0, 127, 255, 32767, 65535, 2147483647])[0]
 }
@@ -118,7 +113,7 @@ function fuzzString() {
 
 
 function fuzz() {
-  return `const
+  const result = `const
   nimFuzzFloat*    = float(   ${ fuzzFloat()    })
   nimFuzzFloat64*  = float64( ${ fuzzFloat()    })
   nimFuzzFloat32*  = float32( ${ fuzzFloat()    })
@@ -138,6 +133,8 @@ function fuzz() {
   nimFuzzNatural*  = Natural( ${ fuzzUint32()   })
   nimFuzzString*   = string(  ${ fuzzString()   })
   nimFuzzChar*     = char(    ${ fuzzChar()     })\n\n`
+  console.log(`FUZZINGS:\n${ result }\n`)
+  return result
 }
 
 
