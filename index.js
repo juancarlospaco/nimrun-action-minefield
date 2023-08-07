@@ -96,7 +96,7 @@ function fuzzUint8() {
 
 
 function fuzzChar() {
-  return `char(${ Math.floor(Math.random() * 256) })`
+  return Math.floor(Math.random() * 256)
 }
 
 
@@ -135,25 +135,25 @@ function fuzzString() {
 
 function fuzz() {
   let result = `const
-  fuzzFloat*   : float    = ${ fuzzFloat()   }
-  fuzzFloat64* : float64  = ${ fuzzFloat()   }
-  fuzzFloat32* : float32  = ${ fuzzFloat()   }
-  fuzzBool*    : bool     = ${ fuzzBool()    }
-  fuzzInt*     : int      = ${ fuzzInt64()   }
-  fuzzInt64*   : int64    = ${ fuzzInt64()   }
-  fuzzInt32*   : int32    = ${ fuzzInt32()   }
-  fuzzInt16*   : int16    = ${ fuzzInt16()   }
-  fuzzInt8*    : int8     = ${ fuzzInt8()    }
-  fuzzUint*    : uint     = ${ fuzzUint64()  }
-  fuzzUint64*  : uint64   = ${ fuzzUint64()  }
-  fuzzUint32*  : uint32   = ${ fuzzUint32()  }
-  fuzzUint16*  : uint16   = ${ fuzzUint16()  }
-  fuzzUint8*   : uint8    = ${ fuzzUint8()   }
-  fuzzByte*    : byte     = ${ fuzzUint8()   }
-  fuzzPositive*: Positive = ${ fuzzUint32()  }
-  fuzzNatural* : Natural  = ${ fuzzUint32()  }
-  fuzzString*  : string   = ${ fuzzString()  }
-  fuzzChar*    : char     = ${ fuzzChar()    }
+  fuzzFloat*   : float    = float(   ${ fuzzFloat()  })
+  fuzzFloat64* : float64  = float64( ${ fuzzFloat()  })
+  fuzzFloat32* : float32  = float32( ${ fuzzFloat()  })
+  fuzzBool*    : bool     = bool(    ${ fuzzBool()   })
+  fuzzInt*     : int      = int(     ${ fuzzInt64()  })
+  fuzzInt64*   : int64    = int64(   ${ fuzzInt64()  })
+  fuzzInt32*   : int32    = int32(   ${ fuzzInt32()  })
+  fuzzInt16*   : int16    = int16(   ${ fuzzInt16()  })
+  fuzzInt8*    : int8     = int8(    ${ fuzzInt8()   })
+  fuzzUint*    : uint     = uint(    ${ fuzzUint64() })
+  fuzzUint64*  : uint64   = uint64(  ${ fuzzUint64() })
+  fuzzUint32*  : uint32   = uint32(  ${ fuzzUint32() })
+  fuzzUint16*  : uint16   = uint16(  ${ fuzzUint16() })
+  fuzzUint8*   : uint8    = uint8(   ${ fuzzUint8()  })
+  fuzzByte*    : byte     = byte(    ${ fuzzUint8()  })
+  fuzzPositive*: Positive = Positive(${ fuzzUint32() })
+  fuzzNatural* : Natural  = Natural( ${ fuzzUint32() })
+  fuzzString*  : string   = string(  ${ fuzzString() })
+  fuzzChar*    : char     = char(    ${ fuzzChar()   })
 `
   console.log(`FUZZINGS = ${ result }`)
   return result
