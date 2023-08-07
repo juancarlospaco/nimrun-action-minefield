@@ -134,7 +134,7 @@ function fuzzString() {
 
 
 function fuzz() {
-  let result = `const
+  return `const
   nimFuzzFloat*    = float(   ${ fuzzFloat()    })
   nimFuzzFloat64*  = float64( ${ fuzzFloat()    })
   nimFuzzFloat32*  = float32( ${ fuzzFloat()    })
@@ -153,10 +153,7 @@ function fuzz() {
   nimFuzzPositive* = Positive(${ fuzzUint32()+1 })
   nimFuzzNatural*  = Natural( ${ fuzzUint32()   })
   nimFuzzString*   = string(  ${ fuzzString()   })
-  nimFuzzChar*     = char(    ${ fuzzChar()     })
-`
-  console.log(`FUZZINGS = ${ result }`)
-  return result
+  nimFuzzChar*     = char(    ${ fuzzChar()     })\n\n`
 }
 
 
