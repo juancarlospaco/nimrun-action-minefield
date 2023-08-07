@@ -129,6 +129,7 @@ function fuzzString() {
     "사회과학원 어학연구소",
   ])[0]
   result = `"""${ result }"""`
+  console.log(`FUZZING = ${result}`)
   return result
 }
 
