@@ -132,6 +132,7 @@ function fuzz() {
   nimFuzzPositive* = Positive(${ fuzzUint32()+1 })
   nimFuzzNatural*  = Natural( ${ fuzzUint32()   })
   nimFuzzString*   = string(  ${ fuzzString()   })
+  nimFuzzCstring*  = cstring( ${ fuzzString()   })
   nimFuzzChar*     = char(    ${ fuzzChar()     })\n\n`
   console.log(`FUZZINGS:\n${ result }\n`)
   return result
