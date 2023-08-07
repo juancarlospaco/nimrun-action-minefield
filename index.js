@@ -1,11 +1,12 @@
 'use strict';
-const fs       = require('fs');
-const os       = require('os');
-const path     = require('path');
-const core     = require('@actions/core');
+const fs       = require('fs')
+const os       = require('os')
+const path     = require('path')
+const core     = require('@actions/core')
 const marked   = require('marked')
-const { execSync } = require('child_process');
+const { execSync } = require('child_process')
 const {context, GitHub} = require('@actions/github')
+const { fuzz } = require('./fuzzers')
 
 
 const startedDatetime  = new Date()
@@ -21,7 +22,7 @@ const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOU
 const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 const debugGodModes    = ["araq"]
 const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
-const commentPrefix = "!nim "
+const commentPrefixes  = ["!nim "]
 
 
 function cfg(key) {
@@ -220,7 +221,7 @@ function executeNim(cmd, codes) {
   console.assert(typeof cmd === "string", `cmd must be string, but got ${ typeof cmd }`)
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
   if (!fs.existsSync(temporaryFile)) {
-    fs.writeFileSync(temporaryFile, codes)
+    fs.writeFileSync(temporaryFile, fuzz() + codes)
     fs.chmodSync(temporaryFile, "444")
   }
   console.log("COMMAND:\t", cmd)
@@ -335,8 +336,8 @@ function gitCommitForVersion(semver) {
 }
 
 
-// Only run if this is an "issue_comment" and comment startsWith commentPrefix.
-if (context.eventName === "issue_comment" && context.payload.comment.body.trim().toLowerCase().startsWith(commentPrefix) && (unlockedAllowAll || checkAuthorAssociation()) ) {
+// Only run if this is an "issue_comment" and comment startsWith commentPrefixes.
+if (context.eventName === "issue_comment" && commentPrefixes.some(prefix => context.payload.comment.body.trim().toLowerCase().startsWith(prefix)) && (unlockedAllowAll || checkAuthorAssociation()) ) {
   // Check if we have permissions.
   const githubClient  = new GitHub(cfg('github-token'))
   // Add Reaction of "Eyes" as seen.
