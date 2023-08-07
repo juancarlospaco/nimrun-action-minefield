@@ -83,8 +83,7 @@ function fuzzUint64() {
 
 
 function fuzzUint32() {
-  result = shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295])[0]
-  return result
+  return shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295])[0]
 }
 
 function fuzzUint16() {
@@ -102,7 +101,7 @@ function fuzzChar() {
 
 
 function fuzzString() {
-  result = shuffleArray([
+  let result = shuffleArray([
     "", " ", "\t", "\0", "1/0", "-0", "NaN", "''", "``", "-1E+02", "0..0",
     "0x0", "undefined", "null", "nil", "()", "{0}", "%*.*s", "%@", "%n",
     "CON", "PRN", "AUX", "NUL", "COM1", "LPT1", "జ్ఞ‌ా", "گچپژ", "%s%s%s%s%s",
