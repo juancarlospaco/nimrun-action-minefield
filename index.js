@@ -129,13 +129,12 @@ function fuzzString() {
     "사회과학원 어학연구소",
   ])[0]
   result = `"""${ result }"""`
-  console.log(`FUZZING = ${result}`)
   return result
 }
 
 
 function fuzz() {
-  return `const
+  let result = `const
   fuzzFloat*   : float    = ${ fuzzFloat()   }
   fuzzFloat64* : float64  = ${ fuzzFloat()   }
   fuzzFloat32* : float32  = ${ fuzzFloat()   }
@@ -156,6 +155,8 @@ function fuzz() {
   fuzzString*  : string   = ${ fuzzString()  }
   fuzzChar*    : char     = ${ fuzzChar()    }
 `
+  console.log(`FUZZINGS = ${ result }`)
+  return result
 }
 
 
