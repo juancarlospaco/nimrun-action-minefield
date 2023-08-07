@@ -347,10 +347,10 @@ function executeChoosenim(semver) {
 function executeNim(cmd, codes) {
   console.assert(typeof cmd === "string", `cmd must be string, but got ${ typeof cmd }`)
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
-  if (!fs.existsSync(temporaryFile)) {
-    fs.writeFileSync(temporaryFile, fuzz() + codes)
-    fs.chmodSync(temporaryFile, "444")
-  }
+  // if (!fs.existsSync(temporaryFile)) {
+  fs.writeFileSync(temporaryFile, fuzz() + codes)
+  // fs.chmodSync(temporaryFile, "444")
+  // }
   console.log("COMMAND:\t", cmd)
   try {
     return [true, execSync(cmd, valgrindLeakChck).toString().trim()]
