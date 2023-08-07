@@ -43,7 +43,7 @@ function shuffleArray(arrai) {
 
 
 function fuzzFloat() {
-  return shuffleArray([-Infinity, -0.0, 2.718281828459045, 3.141592653589793, 6.283185307179586, 2.225073858507201e-308, +Infinity])[0]
+  return shuffleArray([-0.0, 2.718281828459045, 3.141592653589793, 6.283185307179586, 2.225073858507201e-308])[0]
 }
 
 
