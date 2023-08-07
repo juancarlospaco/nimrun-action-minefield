@@ -6,7 +6,6 @@ const core     = require('@actions/core')
 const marked   = require('marked')
 const { execSync } = require('child_process')
 const {context, GitHub} = require('@actions/github')
-const { fuzz } = require('./fuzzers')
 
 
 const startedDatetime  = new Date()
@@ -31,6 +30,134 @@ function cfg(key) {
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result;
 };
+
+
+function shuffleArray(arrai) {
+  console.assert(arrai.length > 0, `arrai must not be empty array, but got ${ arrai }`)
+  const result = [...arrai]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    [result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
+
+function fuzzFloat() {
+  return shuffleArray([-Infinity, -0.0, 2.718281828459045, 3.141592653589793, 6.283185307179586, 2.225073858507201e-308, +Infinity])[0]
+}
+
+
+function fuzzBool() {
+  return shuffleArray([true, false])[0]
+}
+
+
+function fuzzInt64() {
+  return shuffleArray([-9223372036854775808n, -2147483648, -32768, -128, 0, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807n])[0]
+}
+
+
+function fuzzInt() {
+  return fuzzInt64()
+}
+
+
+function fuzzInt32() {
+  return shuffleArray([-2147483648, -32768, -128, 0, 127, 255, 32767, 65535, 2147483647])[0]
+}
+
+
+function fuzzInt16() {
+  return shuffleArray([-32768, -128, 0, 127, 255, 32767])[0]
+}
+
+
+function fuzzInt8() {
+  return shuffleArray([-128, 0, 127])[0]
+}
+
+
+function fuzzUint64() {
+  return shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807n, 18446744073709551615n])[0]
+}
+
+
+function fuzzUint32() {
+  result = shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295])[0]
+  return result
+}
+
+function fuzzUint16() {
+  return shuffleArray([0, 127, 255, 32767, 65535])[0]
+}
+
+function fuzzUint8() {
+  return shuffleArray([0, 127, 255])[0]
+}
+
+
+function fuzzChar() {
+  return `char(${ Math.floor(Math.random() * 256) })`
+}
+
+
+function fuzzString() {
+  result = shuffleArray([
+    "", " ", "\t", "\0", "1/0", "-0", "NaN", "''", "``", "-1E+02", "0..0",
+    "0x0", "undefined", "null", "nil", "()", "{0}", "%*.*s", "%@", "%n",
+    "CON", "PRN", "AUX", "NUL", "COM1", "LPT1", "జ్ఞ‌ా", "گچپژ", "%s%s%s%s%s",
+    "$HOME", "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
+    "ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя",
+    ",。・:*:・゜’( ☻ ω ☻ )。・:*:・゜’",
+    "Ｔｈｅ ｑｕｉｃｋ ｂｒｏｗｎ ｆｏｘ ｊｕｍｐｓ ｏｖｅｒ ｔｈｅ ｌａｚｙ ｄｏｇ",
+    "𝐓𝐡𝐞 𝐪𝐮𝐢𝐜𝐤 𝐛𝐫𝐨𝐰𝐧 𝐟𝐨𝐱 𝐣𝐮𝐦𝐩𝐬 𝐨𝐯𝐞𝐫 𝐭𝐡𝐞 𝐥𝐚𝐳𝐲 𝐝𝐨𝐠",
+    "𝕿𝖍𝖊 𝖖𝖚𝖎𝖈𝖐 𝖇𝖗𝖔𝖜𝖓 𝖋𝖔𝖝 𝖏𝖚𝖒𝖕𝖘 𝖔𝖛𝖊𝖗 𝖙𝖍𝖊 𝖑𝖆𝖟𝖞 𝖉𝖔𝖌",
+    "𝑻𝒉𝒆 𝒒𝒖𝒊𝒄𝒌 𝒃𝒓𝒐𝒘𝒏 𝒇𝒐𝒙 𝒋𝒖𝒎𝒑𝒔 𝒐𝒗𝒆𝒓 𝒕𝒉𝒆 𝒍𝒂𝒛𝒚 𝒅𝒐𝒈",
+    "𝓣𝓱𝓮 𝓺𝓾𝓲𝓬𝓴 𝓫𝓻𝓸𝔀𝓷 𝓯𝓸𝔁 𝓳𝓾𝓶𝓹𝓼 𝓸𝓿𝓮𝓻 𝓽𝓱𝓮 𝓵𝓪𝔃𝔂 𝓭𝓸𝓰",
+    "𝕋𝕙𝕖 𝕢𝕦𝕚𝕔𝕜 𝕓𝕣𝕠𝕨𝕟 𝕗𝕠𝕩 𝕛𝕦𝕞𝕡𝕤 𝕠𝕧𝕖𝕣 𝕥𝕙𝕖 𝕝𝕒𝕫𝕪 𝕕𝕠𝕘",
+    "𝚃𝚑𝚎 𝚚𝚞𝚒𝚌𝚔 𝚋𝚛𝚘𝚠𝚗 𝚏𝚘𝚡 𝚓𝚞𝚖𝚙𝚜 𝚘𝚟𝚎𝚛 𝚝𝚑𝚎 𝚕𝚊𝚣𝚢 𝚍𝚘𝚐",
+    "The quic\b\b\b\b\b\bk brown fo\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007x",
+    "⒯⒣⒠ ⒬⒰⒤⒞⒦ ⒝⒭⒪⒲⒩ ⒡⒪⒳ ⒥⒰⒨⒫⒮ ⒪⒱⒠⒭ ⒯⒣⒠ ⒧⒜⒵⒴ ⒟⒪⒢",
+    "0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟",
+    "בְּרֵאשִׁית, בָּרָא אֱלֹהִים, אֵת הַשָּׁמַיִם, וְאֵת הָאָרֶץ",
+    "Ṱ̺̺̕o͞ ̷i̲̬͇̪͙n̝̗͕v̟̜̘̦͟o̶̙̰̠kè͚̮̺̪̹̱̤ ̖t̝͕̳̣̻̪͞h̼͓̲̦̳̘̲e͇̣̰̦̬͎ ̢̼̻̱̘h͚͎͙̜̣̲ͅi̦̲̣̰̤v̻͍e̺̭̳̪̰-m̢iͅn̖̺̞̲̯̰d̵̼̟͙̩̼̘̳ ̞̥̱̳̭r̛̗̘e͙p͠r̼̞̻̭̗e̺̠̣͟s̘͇̳͍̝͉e͉̥̯̞̲͚̬͜ǹ̬͎͎̟̖͇̤t͍̬̤͓̼̭͘ͅi̪̱n͠g̴͉ ͏͉ͅc̬̟h͡a̫̻̯͘o̫̟̖͍̙̝͉s̗̦̲.̨̹͈̣",
+    "٠١٢٣٤٥٦٧٨٩",
+    "田中さんにあげて下さい",
+    "パーティーへ行かないか",
+    "﷽",
+    "和製漢語",
+    "部落格",
+    "사회과학원 어학연구소",
+  ])[0]
+  result = `"""${ result }"""`
+  return result
+}
+
+
+function fuzz() {
+  return `const
+  fuzzFloat*   : float    = ${ fuzzFloat()   }
+  fuzzFloat64* : float64  = ${ fuzzFloat()   }
+  fuzzFloat32* : float32  = ${ fuzzFloat()   }
+  fuzzBool*    : bool     = ${ fuzzBool()    }
+  fuzzInt*     : int      = ${ fuzzInt64()   }
+  fuzzInt64*   : int64    = ${ fuzzInt64()   }
+  fuzzInt32*   : int32    = ${ fuzzInt32()   }
+  fuzzInt16*   : int16    = ${ fuzzInt16()   }
+  fuzzInt8*    : int8     = ${ fuzzInt8()    }
+  fuzzUint*    : uint     = ${ fuzzUint64()  }
+  fuzzUint64*  : uint64   = ${ fuzzUint64()  }
+  fuzzUint32*  : uint32   = ${ fuzzUint32()  }
+  fuzzUint16*  : uint16   = ${ fuzzUint16()  }
+  fuzzUint8*   : uint8    = ${ fuzzUint8()   }
+  fuzzByte*    : byte     = ${ fuzzUint8()   }
+  fuzzPositive*: Positive = ${ fuzzUint32()  }
+  fuzzNatural* : Natural  = ${ fuzzUint32()  }
+  fuzzString*  : string   = ${ fuzzString()  }
+  fuzzChar*    : char     = ${ fuzzChar()    }
+`
+}
 
 
 function indentString(str, count = 2, indent = ' ') {
