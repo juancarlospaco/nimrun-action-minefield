@@ -113,9 +113,9 @@ function semverParser(str) {
 function versionInfos() {
   return [
     semverParser(execSync("gcc --version").toString()),
-    semverParser(execSync("ldd --version").toString()),
+    execSync("ldd --version").toString().trim(),
     semverParser(execSync("valgrind --version").toString()),
-    semverParser(execSync("node --version").toString()),
+    execSync("node --version").toString().trim(),
     semverParser(execSync("uname --kernel-release").toString()),
   ]
 }
