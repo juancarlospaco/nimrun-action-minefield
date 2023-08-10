@@ -102,7 +102,7 @@ function hasMalloc(cmd) {
 
 function semverParser(str) {
   let result = "0.0.0"
-  const match = str.split("\n")[0].match(/\b(\d+\.\d+\.\d+)\b/)
+  const match = str.split("\n")[0].match(/\b(\d+\.\d+(\.\d+)?)\b/)
   if (match) {
     result = match[1]
   }
@@ -113,9 +113,9 @@ function semverParser(str) {
 function versionInfos() {
   return [
     semverParser(execSync("gcc --version").toString()),
-    execSync("ldd --version").toString().trim(),
+    semverParser(execSync("ldd --version").toString()),
     semverParser(execSync("valgrind --version").toString()),
-    execSync("node --version").toString().trim(),
+    semverParser(execSync("node --version").toString()),
     semverParser(execSync("uname --kernel-release").toString()),
   ]
 }
