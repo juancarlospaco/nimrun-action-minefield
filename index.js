@@ -32,113 +32,6 @@ function cfg(key) {
 };
 
 
-function shuffleArray(arrai) {
-  console.assert(arrai.length > 0, `arrai must not be empty array, but got ${ arrai }`)
-  const result = [...arrai]
-  for (let i = result.length - 1; i > 0; i--) {
-    [result[i], result[Math.floor(Math.random() * (i + 1))]] = [result[Math.floor(Math.random() * (i + 1))], result[i]]
-  }
-  return result
-}
-
-
-function fuzzFloat() {
-  return shuffleArray([-0.0, 2.718281828459045, 3.141592653589793, 6.283185307179586, 2.225073858507201e-308])[0]
-}
-
-
-function fuzzBool() {
-  return shuffleArray([true, false])[0]
-}
-
-
-function fuzzInt64() {
-  return shuffleArray([-9223372036854775808n, -2147483648, -32768, -128, 0, 127, 255, 32767, 65535, 2147483647])[0]
-}
-
-
-function fuzzInt32() {
-  return shuffleArray([-2147483648, -32768, -128, 0, 127, 255, 32767, 65535, 2147483647])[0]
-}
-
-
-function fuzzInt16() {
-  return shuffleArray([-32768, -128, 0, 127, 255, 32767])[0]
-}
-
-
-function fuzzInt8() {
-  return shuffleArray([-128, 0, 127])[0]
-}
-
-
-function fuzzUint64() {
-  return shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807n])[0]
-}
-
-
-function fuzzUint32() {
-  return shuffleArray([0, 127, 255, 32767, 65535, 2147483647, 4294967295])[0]
-}
-
-function fuzzUint16() {
-  return shuffleArray([0, 127, 255, 32767, 65535])[0]
-}
-
-function fuzzUint8() {
-  return shuffleArray([0, 127, 255])[0]
-}
-
-
-function fuzzChar() {
-  return Math.floor(Math.random() * 256)
-}
-
-
-function fuzzString() {
-  let result = shuffleArray([
-    " ", "\t", "\0", "1/0", "-0", "NaN", "''", "``", "-1E+02", "0..0", "0x0", "undefined", "null", "nil", "()", "{0}", "%*.*s", "%@", "%n",
-    "CON", "PRN", "AUX", "NUL", "COM1", "LPT1", "జ్ఞ‌ా", "گچپژ", "%s%s%s%s%s", "$HOME", "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
-    "ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя", ",。・:*:・゜’( ☻ ω ☻ )。・:*:・゜’",
-    "Ｔｈｅ ｑｕｉｃｋ ｂｒｏｗｎ ｆｏｘ ｊｕｍｐｓ ｏｖｅｒ ｔｈｅ ｌａｚｙ ｄｏｇ", "𝐓𝐡𝐞 𝐪𝐮𝐢𝐜𝐤 𝐛𝐫𝐨𝐰𝐧 𝐟𝐨𝐱 𝐣𝐮𝐦𝐩𝐬 𝐨𝐯𝐞𝐫 𝐭𝐡𝐞 𝐥𝐚𝐳𝐲 𝐝𝐨𝐠",
-    "𝕿𝖍𝖊 𝖖𝖚𝖎𝖈𝖐 𝖇𝖗𝖔𝖜𝖓 𝖋𝖔𝖝 𝖏𝖚𝖒𝖕𝖘 𝖔𝖛𝖊𝖗 𝖙𝖍𝖊 𝖑𝖆𝖟𝖞 𝖉𝖔𝖌", "𝑻𝒉𝒆 𝒒𝒖𝒊𝒄𝒌 𝒃𝒓𝒐𝒘𝒏 𝒇𝒐𝒙 𝒋𝒖𝒎𝒑𝒔 𝒐𝒗𝒆𝒓 𝒕𝒉𝒆 𝒍𝒂𝒛𝒚 𝒅𝒐𝒈", "𝓣𝓱𝓮 𝓺𝓾𝓲𝓬𝓴 𝓫𝓻𝓸𝔀𝓷 𝓯𝓸𝔁 𝓳𝓾𝓶𝓹𝓼 𝓸𝓿𝓮𝓻 𝓽𝓱𝓮 𝓵𝓪𝔃𝔂 𝓭𝓸𝓰",
-    "𝕋𝕙𝕖 𝕢𝕦𝕚𝕔𝕜 𝕓𝕣𝕠𝕨𝕟 𝕗𝕠𝕩 𝕛𝕦𝕞𝕡𝕤 𝕠𝕧𝕖𝕣 𝕥𝕙𝕖 𝕝𝕒𝕫𝕪 𝕕𝕠𝕘", "𝚃𝚑𝚎 𝚚𝚞𝚒𝚌𝚔 𝚋𝚛𝚘𝚠𝚗 𝚏𝚘𝚡 𝚓𝚞𝚖𝚙𝚜 𝚘𝚟𝚎𝚛 𝚝𝚑𝚎 𝚕𝚊𝚣𝚢 𝚍𝚘𝚐", "사회과학원 어학연구소", "部落格",
-    "The quic\b\b\b\b\b\bk brown fo\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007\u0007x", "和製漢語",
-    "⒯⒣⒠ ⒬⒰⒤⒞⒦ ⒝⒭⒪⒲⒩ ⒡⒪⒳ ⒥⒰⒨⒫⒮ ⒪⒱⒠⒭ ⒯⒣⒠ ⒧⒜⒵⒴ ⒟⒪⒢", "0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟", "﷽",
-    "בְּרֵאשִׁית, בָּרָא אֱלֹהִים, אֵת הַשָּׁמַיִם, וְאֵת הָאָרֶץ", "Ṱ̺̺̕o͞ ̷i̲̬͇̪͙n̝̗͕v̟̜̘̦͟o̶̙̰̠kè͚̮̺̪̹̱̤ ̖t̝͕̳̣̻̪͞h̼͓̲̦̳̘̲e͇̣̰̦̬͎ ̢̼̻̱̘h͚͎͙̜̣̲ͅi̦̲̣̰̤v̻͍e̺̭̳̪̰-m̢iͅn̖̺̞̲̯̰d̵̼̟͙̩̼̘̳ ̞̥̱̳̭r̛̗̘e͙p͠r̼̞̻̭̗e̺̠̣͟s̘͇̳͍̝͉e͉̥̯̞̲͚̬͜ǹ̬͎͎̟̖͇̤t͍̬̤͓̼̭͘ͅi̪̱n͠g̴͉ ͏͉ͅc̬̟h͡a̫̻̯͘o̫̟̖͍̙̝͉s̗̦̲.̨̹͈̣", "٠١٢٣٤٥٦٧٨٩", "田中さんにあげて下さい", "パーティーへ行かないか",
-  ])[0]
-  result = `"""${ result }"""`
-  return result
-}
-
-
-function fuzz() {
-  const result = `const
-  nimFuzzFloat*    = float(   ${ fuzzFloat()    })
-  nimFuzzFloat64*  = float64( ${ fuzzFloat()    })
-  nimFuzzFloat32*  = float32( ${ fuzzFloat()    })
-  nimFuzzBool*     = bool(    ${ fuzzBool()     })
-  nimFuzzInt*      = int(     ${ fuzzInt64()    })
-  nimFuzzInt64*    = int64(   ${ fuzzInt64()    })
-  nimFuzzInt32*    = int32(   ${ fuzzInt32()    })
-  nimFuzzInt16*    = int16(   ${ fuzzInt16()    })
-  nimFuzzInt8*     = int8(    ${ fuzzInt8()     })
-  nimFuzzUint*     = uint(    ${ fuzzUint64()   })
-  nimFuzzUint64*   = uint64(  ${ fuzzUint64()   })
-  nimFuzzUint32*   = uint32(  ${ fuzzUint32()   })
-  nimFuzzUint16*   = uint16(  ${ fuzzUint16()   })
-  nimFuzzUint8*    = uint8(   ${ fuzzUint8()    })
-  nimFuzzByte*     = byte(    ${ fuzzUint8()    })
-  nimFuzzPositive* = Positive(${ fuzzUint32()+1 })
-  nimFuzzNatural*  = Natural( ${ fuzzUint32()   })
-  nimFuzzString*   = string(  ${ fuzzString()   })
-  nimFuzzCstring*  = cstring( ${ fuzzString()   })
-  nimFuzzChar*     = char(    ${ fuzzChar()     })\n\n`
-  console.log(`FUZZINGS:\n${ result }\n`)
-  return result
-}
-
-
 function indentString(str, count = 2, indent = ' ') {
   return str.replace(/^/gm, indent.repeat(count))
 }
@@ -326,10 +219,10 @@ function executeChoosenim(semver) {
 function executeNim(cmd, codes) {
   console.assert(typeof cmd === "string", `cmd must be string, but got ${ typeof cmd }`)
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
-  // if (!fs.existsSync(temporaryFile)) {
-  fs.writeFileSync(temporaryFile, fuzz() + codes)
-  // fs.chmodSync(temporaryFile, "444")
-  // }
+  if (!fs.existsSync(temporaryFile)) {
+    fs.writeFileSync(temporaryFile, codes)
+    fs.chmodSync(temporaryFile, "444")
+  }
   console.log("COMMAND:\t", cmd)
   try {
     return [true, execSync(cmd, valgrindLeakChck).toString().trim()]
