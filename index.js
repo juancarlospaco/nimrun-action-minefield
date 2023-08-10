@@ -505,9 +505,9 @@ ${ tripleBackticks }\n`
           }
         }
       }
-      else { console.warn("failsCommit and worksCommit not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
+      else { console.warn(`failsCommit and worksCommit not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.\nfailsCommit = ${failsCommit}\tworksCommit = ${worksCommit}`) }
     }
-    else { console.warn("works and fails not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.") }
+    else { console.warn(`works and fails not found, at least 1 working commit and 1 non-working commit are required for Bisect commit-by-commit.\nfails = ${fails}\tworks = ${works}`) }
     // Report results back as a comment on the issue.
     const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
     const v = versionInfos()
