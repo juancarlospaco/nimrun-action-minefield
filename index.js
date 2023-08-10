@@ -100,13 +100,23 @@ function hasMalloc(cmd) {
 }
 
 
+function semverParser(str) {
+  let result = "0.0.0"
+  const match = str.split("\n")[0].match(/\b(\d+\.\d+\.\d+)\b/)
+  if (match) {
+    result = match[1]
+  }
+  return result
+}
+
+
 function versionInfos() {
   return [
-    execSync("gcc --version").toString().split("\n")[0].replace("gcc", "").trim(),
-    execSync("ldd --version").toString().split("\n")[0].replace("ldd", "").trim(),
-    execSync("valgrind --version").toString().split("\n")[0].replace("valgrind-", "").trim(),
-    execSync("node --version").toString().split("\n")[0].replace("v", "").trim(),
-    execSync("uname --kernel-release").toString().split("\n")[0].replace("azure", "").trim(),
+    semverParser(execSync("gcc --version").toString()),
+    semverParser(execSync("ldd --version").toString()),
+    semverParser(execSync("valgrind --version").toString()),
+    semverParser(execSync("node --version").toString()),
+    semverParser(execSync("uname --kernel-release").toString()),
   ]
 }
 
@@ -468,7 +478,7 @@ ${commitsNear}
 <li><b>NodeJS  </b>\t<code>${ v[3] }</code>
 <li><b>Linux   </b>\t<code>${ v[4] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
-<li><b>Issue Comments</b>\t<code>${ context.payload.issue.comments }</code>
+<li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
     addIssueComment(githubClient, issueCommentStr)
