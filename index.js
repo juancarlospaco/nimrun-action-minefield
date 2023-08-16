@@ -144,7 +144,7 @@ function parseGithubComment(comment) {
       if (token.lang === 'nim') {
         console.log("nimFileCounter = ", nimFileCounter)
         if (nimFileCounter > 0) {
-          const xtraFile = `${ temporaryFile }${ nimFileCounter }.nim`
+          const xtraFile = temporaryFile.replace(".nim", `${ nimFileCounter }.nim`)
           console.log("xtraFile = ", xtraFile)
           if (!fs.existsSync(xtraFile)) {
             fs.writeFileSync(xtraFile, token.text.trim())
