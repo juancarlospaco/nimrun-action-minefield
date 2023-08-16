@@ -142,16 +142,18 @@ function parseGithubComment(comment) {
   for (const token of tokens) {
     if (token.type === 'code' && token.text.length > 0 && token.lang !== undefined) {
       if (token.lang === 'nim') {
+        console.log("nimFileCounter = ", nimFileCounter)
         if (nimFileCounter > 0) {
           const xtraFile = `${ temporaryFile }${ nimFileCounter }.nim`
+          console.log("xtraFile = ", xtraFile)
           if (!fs.existsSync(xtraFile)) {
             fs.writeFileSync(xtraFile, token.text.trim())
             fs.chmodSync(xtraFile, "444")
           }
         } else {
+          nimFileCounter += 1
           result = token.text.trim()
           result = result.split('\n').filter(line => line.trim() !== '').join('\n')
-          nimFileCounter += 1
         }
       } else if (allowedFileExtensions.includes(token.lang)) {
         const xtraFile = `${ process.cwd() }/temp.${token.lang}`
