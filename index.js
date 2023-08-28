@@ -546,7 +546,7 @@ ${ tripleBackticks }\n`
 <li><b>Linux   </b>\t<code>${ v[4] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul><h3>Bash Ouput</h3>
+<li><b>Commands</b>\t<code>${ cmd }</code></ul><h3>Bash Ouput</h3>\n
 ${ tripleBackticks }sh
 ${ shOutput }
 ${ tripleBackticks }</details>\n
