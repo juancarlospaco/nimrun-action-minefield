@@ -272,7 +272,7 @@ function executeSh() {
   let result = ""
   if (fs.existsSync(`${ process.cwd() }/temp.sh`)) {
     try {
-      result = execSync(`nimble --noColor --noSslCheck refresh && nim sh ${ process.cwd() }/temp.sh`).toString().trim()
+      result = execSync(`nimble --noColor --noSslCheck refresh && sh ${ process.cwd() }/temp.sh`).toString().trim()
     } catch (error) {
       console.warn(error)
       result = ""
