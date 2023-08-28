@@ -420,6 +420,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
     let commitsLen      = nimFinalVersions.length
     let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
     const shOutput = executeSh()
+    console.log(shOutput)
     // Check the same code agaisnt all versions of Nim from devel to 1.0
     for (let semver of nimFinalVersions) {
       console.log(executeChoosenim(semver))
