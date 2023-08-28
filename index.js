@@ -419,11 +419,11 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
     let works           = null
     let commitsLen      = nimFinalVersions.length
     let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
-    const shOutput = executeSh()
-    console.log(shOutput)
     // Check the same code agaisnt all versions of Nim from devel to 1.0
     for (let semver of nimFinalVersions) {
       console.log(executeChoosenim(semver))
+      const shOutput = executeSh()
+      console.log(shOutput)
       const started  = new Date()
       let [isOk, output] = executeNim(cmd, codes)
       const finished = new Date()
@@ -455,6 +455,14 @@ ${ tripleBackticks }\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
 ${ tripleBackticks }\n`
+
+        if (shOutput.length > 0) {
+          issueCommentStr += `<h3>Bash</h3>\n
+${ tripleBackticks }sh
+${ shOutput }
+${ tripleBackticks }\n`
+        }
+
       }
       issueCommentStr += "</details>\n"
     }
@@ -546,10 +554,7 @@ ${ tripleBackticks }\n`
 <li><b>Linux   </b>\t<code>${ v[4] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul><h3>Bash Ouput</h3>\n
-${ tripleBackticks }sh
-${ shOutput }
-${ tripleBackticks }</details>\n
+<li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
     addIssueComment(githubClient, issueCommentStr)
   }
