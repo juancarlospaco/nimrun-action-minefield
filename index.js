@@ -455,14 +455,6 @@ ${ tripleBackticks }\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
 ${ tripleBackticks }\n`
-
-        if (shOutput.length > 0) {
-          issueCommentStr += `<h3>Bash</h3>\n
-${ tripleBackticks }sh
-${ shOutput }
-${ tripleBackticks }\n`
-        }
-
       }
       issueCommentStr += "</details>\n"
     }
