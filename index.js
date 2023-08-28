@@ -147,7 +147,7 @@ async function addIssueComment(githubClient, issueCommentBody) {
 function parseGithubComment(comment) {
   console.assert(typeof comment === "string", `comment must be string, but got ${ typeof comment }`)
   const tokens = marked.Lexer.lex(comment)
-  const allowedFileExtensions = ["c", "cpp", "c++", "h", "hpp", "js", "json", "txt"]
+  const allowedFileExtensions = ["c", "cpp", "c++", "h", "hpp", "js", "json", "txt", "sh"]
   let result = ""
   for (const token of tokens) {
     if (token.type === 'code' && token.text.length > 0 && token.lang !== undefined) {
@@ -265,6 +265,21 @@ function executeNim(cmd, codes) {
     console.warn('executeNim received an empty string code')
     return [false, ""]
   }
+}
+
+
+function executeSh() {
+  let result = ""
+  if (fs.existsSync(`${ process.cwd() }/temp.sh`)) {
+    try {
+      result = execSync(`sh ${ process.cwd() }/temp.sh`).toString().trim()
+    } catch (error) {
+      console.warn(error)
+      result = ""
+    }
+    result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
+  }
+  return result
 }
 
 
@@ -404,6 +419,7 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
     let works           = null
     let commitsLen      = nimFinalVersions.length
     let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
+    const shOutput = executeSh()
     // Check the same code agaisnt all versions of Nim from devel to 1.0
     for (let semver of nimFinalVersions) {
       console.log(executeChoosenim(semver))
@@ -529,7 +545,10 @@ ${ tripleBackticks }\n`
 <li><b>Linux   </b>\t<code>${ v[4] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
+<li><b>Commands</b>\t<code>${ cmd }</code></ul><h3>Bash Ouput</h3>
+${ tripleBackticks }sh
+${ shOutput }
+${ tripleBackticks }</details>\n
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
     addIssueComment(githubClient, issueCommentStr)
   }
