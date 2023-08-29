@@ -154,7 +154,7 @@ async function getBranchName(githubClient) {
     owner      : context.repo.owner,
     repo       : context.repo.repo,
     pull_number: context.payload.issue.number,
-  }).data).head.ref
+  })).data.head.ref
   console.log("INSIDE getBranchName()", branch)
   console.log("INSIDE typeof name === 'string'", typeof branch === 'string')
   if (fs.existsSync(gitTempPath)) {
