@@ -39,7 +39,7 @@ function indentString(str, count = 2, indent = ' ') {
 
 
 function isPR(context) {
-  return Boolean(context !== undefined && context.payload !== undefined && context.payload.pull_request !== undefined)
+  return Boolean(context && context.payload && context.payload.issue && context.payload.issue.pull_request && context.payload.issue.pull_request.merged_at === null)
 }
 
 
@@ -422,7 +422,7 @@ if (context.eventName === "issue_comment" && (isPR(context) || isIssue(context))
   console.log("################################################################")
   console.log("isIssue = ", isIssue(context))
   console.log("isPR = ", isPR(context))
-  console.log(context.payload.issue.pull_request  )
+  console.log(context.payload.issue.pull_request  )  //
   console.log(JSON.stringify(context.payload, null, 2) )
   console.log("################################################################")
 
