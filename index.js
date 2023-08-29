@@ -422,7 +422,7 @@ if (context.eventName === "issue_comment" && (isPR(context) || isIssue(context))
   console.log("################################################################")
   console.log("isIssue = ", isIssue(context))
   console.log("isPR = ", isPR(context))
-  console.log(context.payload.toJSON() )
+  console.log(JSON.stringify(context.payload) )
   console.log("################################################################")
 
   // Check if we have permissions.
