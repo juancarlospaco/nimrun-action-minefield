@@ -315,16 +315,8 @@ function getIR() {
 function gitInit(url, branch) {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
-    console.log(execSync(`git clone --single-branch --branch ${branch} "${url}" ${gitTempPath}`).toString())
+    console.log(execSync(`git clone --single-branch --branch "${branch}" "${url}" ${gitTempPath}`).toString())
     console.log(execSync(`git config --global user.email "${ context.actor }@nim.org" && git config --global user.name "${ context.actor }" && git config --global advice.detachedHead false && git config --global pull.rebase false`, {cwd: gitTempPath}).toString())
-  }
-}
-
-
-function gitPullPRBranch() {
-  // Git pull branch from PR
-  if (fs.existsSync(gitTempPath)) {
-    console.log(execSync(`git pull "${ context.payload.repository.clone_url }" juancarlospaco-patch-1 --allow-unrelated-histories`, {cwd: gitTempPath}).toString())
   }
 }
 
@@ -550,9 +542,8 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log("######################### is PR #########################")
       console.log( JSON.stringify(context.payload, null, 2))
       console.log(executeChoosenim("devel"))
-      gitInit()
-      console.log(">>> gitPullPRBranch():")
-      gitPullPRBranch()
+      console.log(">>> gitInit():")
+      gitInit(context.payload.repository.clone_url, "juancarlospaco-patch-1")
 
     }
   }
