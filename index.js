@@ -150,13 +150,15 @@ async function addIssueComment(githubClient, issueCommentBody) {
 
 
 async function getBranchName(githubClient) {
-  const name = (await githubClient.pulls.get({
+  const branch = (await githubClient.pulls.get({
     owner      : context.repo.owner,
     repo       : context.repo.repo,
     pull_number: context.payload.issue.number,
   }).data).head.ref
-  if (typeof name === 'string') {
-    process.env.BRANCHNAME = name
+  console.log("INSIDE getBranchName()", branch)
+  console.log("INSIDE typeof name === 'string'", typeof branch === 'string')
+  if (fs.existsSync(gitTempPath)) {
+    console.log(execSync(`git checkout "${branch}"`, {cwd: gitTempPath}).toString())
   }
 }
 
@@ -554,10 +556,8 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log( JSON.stringify(context.payload, null, 2))
       console.log(executeChoosenim("devel"))
       console.log(">>> getBranchName():")
-      process.env.BRANCHNAME = ""
+
       console.log(getBranchName(githubClient))
-      while (process.env.BRANCHNAME.length == 0) {}
-      console.log("process.env.BRANCHNAME = ", process.env.BRANCHNAME)
 
       gitInit(context.payload.repository.clone_url, "juancarlospaco-patch-1")
 
