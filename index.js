@@ -324,7 +324,7 @@ function gitInit() {
 function gitPullPRBranch() {
   // Git pull branch from PR
   if (fs.existsSync(gitTempPath)) {
-    console.log(execSync(`git pull "${ context.payload.repository.clone_url }" juancarlospaco-patch-1 --allow-unrelated-histories --force`, {cwd: gitTempPath}).toString())
+    console.log(execSync(`git pull "${ context.payload.repository.clone_url }" juancarlospaco-patch-1 --allow-unrelated-histories`, {cwd: gitTempPath}).toString())
   }
 }
 
