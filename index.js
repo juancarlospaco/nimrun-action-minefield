@@ -149,6 +149,16 @@ async function addIssueComment(githubClient, issueCommentBody) {
 };
 
 
+async function getBranchName(githubClient) {
+  const { data: pullRequest } = await githubClient.pulls.get({
+    owner      : context.repo.owner,
+    repo       : context.repo.repo,
+    pull_number: context.payload.issue.number,
+  })
+  return pullRequest.head.ref
+};
+
+
 function parseGithubComment(comment) {
   console.assert(typeof comment === "string", `comment must be string, but got ${ typeof comment }`)
   const tokens = marked.Lexer.lex(comment)
@@ -539,10 +549,12 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
   :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
       addIssueComment(githubClient, issueCommentStr)
     } else {
-      console.log("######################### is PR #########################")
       console.log( JSON.stringify(context.payload, null, 2))
       console.log(executeChoosenim("devel"))
-      console.log(">>> gitInit():")
+      console.log(">>> getBranchName():")
+
+      console.log(getBranchName(githubClient))
+
       gitInit(context.payload.repository.clone_url, "juancarlospaco-patch-1")
 
     }
