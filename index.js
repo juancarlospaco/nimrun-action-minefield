@@ -321,6 +321,14 @@ function gitInit() {
 }
 
 
+function gitPullPRBranch() {
+  // Git pull branch from PR
+  if (!fs.existsSync(gitTempPath)) {
+    console.log(execSync(`git pull ${ context.payload.repository.clone_url } juancarlospaco-patch-1`, {cwd: gitTempPath}).toString())
+  }
+}
+
+
 function gitMetadata(commit) {
   // Git get useful metadata from current commit
   console.assert(typeof commit === "string", `commit must be string, but got ${ typeof commit }`)
@@ -543,6 +551,8 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log( JSON.stringify(context.payload, null, 2))
       console.log(executeChoosenim("devel"))
       gitInit()
+      gitPullPRBranch()
+
     }
   }
   else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
