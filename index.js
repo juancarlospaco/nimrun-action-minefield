@@ -558,7 +558,6 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
     } else {
       console.log("######################### is PR #########################")
       console.log( JSON.stringify(context.payload, null, 2))
-
     }
   }
   else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
