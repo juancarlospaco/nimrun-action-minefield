@@ -557,6 +557,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       addIssueComment(githubClient, issueCommentStr)
     } else {
       console.log("######################### is PR #########################")
+      console.log( JSON.stringify(context.payload, null, 2))
 
     }
   }
