@@ -557,7 +557,7 @@ if (context.eventName === "issue_comment" && (isPR(context) || isIssue(context))
       addIssueComment(githubClient, issueCommentStr)
     } else {
       console.log("######################### is PR #########################")
-      console.log(context.payload.pull_request.toJSON() )
+
     }
   }
   else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
