@@ -551,6 +551,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log( JSON.stringify(context.payload, null, 2))
       console.log(executeChoosenim("devel"))
       gitInit()
+      console.log(">>> gitPullPRBranch():")
       gitPullPRBranch()
 
     }
