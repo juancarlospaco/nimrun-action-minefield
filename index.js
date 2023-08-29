@@ -555,7 +555,8 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log(executeChoosenim("devel"))
       gitInit(context.payload.repository.clone_url)
       if (fs.existsSync(gitTempPath)) {
-        console.log(execSync(`git checkout "juancarlospaco-patch-1" && nim c koch.nim`, {cwd: gitTempPath}).toString())
+        process.chdir(gitTempPath)
+        console.log(execSync("git checkout juancarlospaco-patch-1 && nim c koch.nim").toString())
       }
       // console.log(execSync(`tree`, {cwd: `${ process.cwd() }`}).toString())
       // setPRBranch(githubClient)
