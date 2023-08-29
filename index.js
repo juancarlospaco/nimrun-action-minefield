@@ -323,7 +323,7 @@ function gitInit() {
 
 function gitPullPRBranch() {
   // Git pull branch from PR
-  if (!fs.existsSync(gitTempPath)) {
+  if (fs.existsSync(gitTempPath)) {
     console.log(execSync(`git pull ${ context.payload.repository.clone_url } juancarlospaco-patch-1`, {cwd: gitTempPath}).toString())
   }
 }
