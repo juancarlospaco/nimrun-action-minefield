@@ -149,15 +149,13 @@ async function addIssueComment(githubClient, issueCommentBody) {
 };
 
 
-async function getBranchName(githubClient) {
+async function setPRBranch(githubClient) {
   const branch = (await githubClient.pulls.get({
     owner      : context.repo.owner,
     repo       : context.repo.repo,
     pull_number: context.payload.issue.number,
   })).data.head.ref
-  console.log("INSIDE getBranchName()", branch)
-  console.log("INSIDE typeof name === 'string'", typeof branch === 'string')
-  if (fs.existsSync(gitTempPath)) {
+  if (fs.existsSync(gitTempPath) && typeof branch === 'string' && branch.length > 0) {
     console.log(execSync(`git checkout "${branch}"`, {cwd: gitTempPath}).toString())
   }
 }
@@ -326,10 +324,10 @@ function getIR() {
 }
 
 
-function gitInit(url, branch) {
+function gitInit(url) {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
-    console.log(execSync(`git clone --single-branch --branch "${branch}" "${url}" ${gitTempPath}`).toString())
+    console.log(execSync(`git clone "${url}" ${gitTempPath}`).toString())
     console.log(execSync(`git config --global user.email "${ context.actor }@nim.org" && git config --global user.name "${ context.actor }" && git config --global advice.detachedHead false && git config --global pull.rebase false && git status`, {cwd: gitTempPath}).toString())
   }
 }
@@ -466,7 +464,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       // This part is about finding the specific commit that breaks
       if (fails !== null && works !== null && fails !== works) {
         // Get a range of commits between "FAILS..WORKS"
-        gitInit("https://github.com/nim-lang/Nim.git", "devel")
+        gitInit("https://github.com/nim-lang/Nim.git")
         const failsCommit = gitCommitForVersion(fails)
         const worksCommit = gitCommitForVersion(works)
         if (failsCommit !== null && worksCommit !== null && failsCommit !== worksCommit) {
@@ -555,11 +553,10 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
     } else {
       console.log( JSON.stringify(context.payload, null, 2))
       console.log(executeChoosenim("devel"))
-      console.log(">>> getBranchName():")
 
-      console.log(getBranchName(githubClient))
-
-      gitInit(context.payload.repository.clone_url, "juancarlospaco-patch-1")
+      gitInit(context.payload.repository.clone_url)
+      console.log(">>> setPRBranch():")
+      setPRBranch(githubClient)
 
     }
   }
