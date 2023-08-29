@@ -316,7 +316,7 @@ function gitInit() {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
     console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`).toString())
-    console.log(execSync("git config --global advice.detachedHead false && git checkout devel", {cwd: gitTempPath}).toString())
+    console.log(execSync("git config --global advice.detachedHead false && git config --global pull.rebase false && git checkout devel", {cwd: gitTempPath}).toString())
   }
 }
 
