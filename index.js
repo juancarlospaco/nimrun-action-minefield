@@ -552,7 +552,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log(executeChoosenim("devel"))
       console.log(">>> getBranchName():")
 
-      console.log(getBranchName(githubClient))
+      console.log((await getBranchName(githubClient)))
 
       gitInit(context.payload.repository.clone_url, "juancarlospaco-patch-1")
 
