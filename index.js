@@ -553,9 +553,10 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
     } else {
       // console.log( JSON.stringify(context.payload, null, 2))
       gitInit(context.payload.repository.clone_url)
-      console.log(executeChoosenim("devel"))
-      console.log(execSync(`nim c ${ process.cwd() }/Nim/koch.nim`, {cwd: gitTempPath}).toString())
       setPRBranch(githubClient)
+      console.log(executeChoosenim("devel"))
+      console.log(execSync(`nim c koch.nim`).toString())
+      console.log(execSync(`nim c koch.nim`, {cwd: gitTempPath}).toString())
       // console.log(execSync(`tree`, {cwd: `${ process.cwd() }`}).toString())
 
     }
