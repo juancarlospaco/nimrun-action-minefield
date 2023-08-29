@@ -273,21 +273,6 @@ function executeNim(cmd, codes) {
 }
 
 
-function executeSh() {
-  let result = ""
-  if (fs.existsSync(`${ process.cwd() }/temp.sh`)) {
-    try {
-      result = execSync(`nimble --noColor --noSslCheck refresh && sh ${ process.cwd() }/temp.sh`).toString().trim()
-    } catch (error) {
-      console.warn(error)
-      result = ""
-    }
-    result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
-  }
-  return result
-}
-
-
 function executeAstGen(codes) {
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
   if (typeof codes === "string" && codes.length > 0) {
@@ -428,8 +413,6 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       // Check the same code agaisnt all versions of Nim from devel to 1.0
       for (let semver of nimFinalVersions) {
         console.log(executeChoosenim(semver))
-        const shOutput = executeSh()
-        console.log(shOutput)
         const started  = new Date()
         let [isOk, output] = executeNim(cmd, codes)
         const finished = new Date()
@@ -558,6 +541,8 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
     } else {
       console.log("######################### is PR #########################")
       console.log( JSON.stringify(context.payload, null, 2))
+      console.log(executeChoosenim("devel"))
+      gitInit()
     }
   }
   else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
