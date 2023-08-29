@@ -418,6 +418,12 @@ function gitCommitForVersion(semver) {
 
 // Only run if this is an "issue_comment" and comment startsWith comment prefixes.
 if (context.eventName === "issue_comment" && (isPR(context) || isIssue(context)) && (githubComment.startsWith("!nim ") || githubComment.startsWith("!fuzz ")) && (unlockedAllowAll || checkAuthorAssociation()) ) {
+
+  console.log("################################################################")
+  console.log("isIssue = ", isIssue(context))
+  console.log("isPR = ", isPR(context))
+  console.log("################################################################")
+
   // Check if we have permissions.
   const githubClient  = new GitHub(cfg('github-token'))
   // Add Reaction of "Eyes" as seen.
