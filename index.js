@@ -555,8 +555,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log(executeChoosenim("devel"))
       gitInit(context.payload.repository.clone_url)
       setPRBranch(githubClient)
-      console.log(execSync("nim c koch.nim", {cwd: gitTempPath}).toString())
-      console.log(execSync("./koch boot -d:release", {cwd: gitTempPath}).toString())
+      console.log(execSync("nim c koch.nim && ./koch boot -d:release", {cwd: gitTempPath}).toString())
 
     }
   }
