@@ -150,15 +150,11 @@ async function addIssueComment(githubClient, issueCommentBody) {
 
 
 async function getBranchName(githubClient) {
-  const { data: pullRequest } = await githubClient.pulls.get({
+  return (await githubClient.pulls.get({
     owner      : context.repo.owner,
     repo       : context.repo.repo,
     pull_number: context.payload.issue.number,
-  })
-  const result = await pullRequest.head.ref
-  console.log("BRANCHO = ", result)
-  console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
-  return result
+  }).data.head.ref)
 };
 
 
