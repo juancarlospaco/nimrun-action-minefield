@@ -553,10 +553,9 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
     } else {
       console.log( JSON.stringify(context.payload, null, 2))
       console.log(executeChoosenim("devel"))
-
       gitInit(context.payload.repository.clone_url)
-      console.log(">>> setPRBranch():")
       setPRBranch(githubClient)
+      console.log(execSync(`choosenim --noColor --skipClean --yes "${gitTempPath}"`, choosenimNoAnal).toString())
 
     }
   }
