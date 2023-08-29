@@ -316,7 +316,7 @@ function gitInit(url, branch) {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
     console.log(execSync(`git clone --single-branch --branch "${branch}" "${url}" ${gitTempPath}`).toString())
-    console.log(execSync(`git config --global user.email "${ context.actor }@nim.org" && git config --global user.name "${ context.actor }" && git config --global advice.detachedHead false && git config --global pull.rebase false`, {cwd: gitTempPath}).toString())
+    console.log(execSync(`git config --global user.email "${ context.actor }@nim.org" && git config --global user.name "${ context.actor }" && git config --global advice.detachedHead false && git config --global pull.rebase false && git status`, {cwd: gitTempPath}).toString())
   }
 }
 
