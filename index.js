@@ -149,8 +149,8 @@ async function addIssueComment(githubClient, issueCommentBody) {
 };
 
 
-async function getBranchName(githubClient) {
-  return (await githubClient.pulls.get({
+async function getBranchName(githubClient, name) {
+  name = (await githubClient.pulls.get({
     owner      : context.repo.owner,
     repo       : context.repo.repo,
     pull_number: context.payload.issue.number,
@@ -552,7 +552,9 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       console.log(executeChoosenim("devel"))
       console.log(">>> getBranchName():")
 
-      console.log((await getBranchName(githubClient)))
+      let name = ""
+      console.log(getBranchName(githubClient, name))
+      console.log(name)
 
       gitInit(context.payload.repository.clone_url, "juancarlospaco-patch-1")
 
