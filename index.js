@@ -555,7 +555,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       gitInit(context.payload.repository.clone_url)
       setPRBranch(githubClient)
       console.log(executeChoosenim("devel"))
-      console.log(execSync(`tree`, {cwd: gitTempPath}).toString())
+      console.log(execSync(`tree`, {cwd: `${ process.cwd() }`}).toString())
 
     }
   }
