@@ -552,13 +552,14 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       addIssueComment(githubClient, issueCommentStr)
     } else {
       // console.log( JSON.stringify(context.payload, null, 2))
-      gitInit(context.payload.repository.clone_url)
-      setPRBranch(githubClient)
       console.log(executeChoosenim("devel"))
-      console.log(execSync(`nim c koch.nim`).toString())
-      console.log(execSync(`nim c koch.nim`, {cwd: gitTempPath}).toString())
+      gitInit(context.payload.repository.clone_url)
+      if (fs.existsSync(gitTempPath)) {
+        console.log(execSync(`git checkout "juancarlospaco-patch-1" && nim c koch.nim`, {cwd: gitTempPath}).toString())
+      }
       // console.log(execSync(`tree`, {cwd: `${ process.cwd() }`}).toString())
-
+      // setPRBranch(githubClient)
+      // process.chdir(newDirectory);
     }
   }
   else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
