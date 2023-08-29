@@ -551,10 +551,10 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
   :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
       addIssueComment(githubClient, issueCommentStr)
     } else {
-      console.log( JSON.stringify(context.payload, null, 2))
-      console.log(executeChoosenim("devel"))
+      // console.log( JSON.stringify(context.payload, null, 2))
       gitInit(context.payload.repository.clone_url)
       setPRBranch(githubClient)
+      console.log(executeChoosenim("devel"))
       console.log(execSync(`ls`, {cwd: gitTempPath}).toString())
 
     }
