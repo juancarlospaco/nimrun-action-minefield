@@ -157,7 +157,6 @@ async function setPRBranch(githubClient) {
   })).data.head.ref
   if (fs.existsSync(gitTempPath) && typeof branch === 'string' && branch.length > 0) {
     console.log(execSync(`git checkout "${branch}"`, {cwd: gitTempPath}).toString())
-    console.log(execSync(`nim c koch.nim `, {cwd: gitTempPath}).toString())
   }
 }
 
@@ -555,6 +554,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       // console.log( JSON.stringify(context.payload, null, 2))
       gitInit(context.payload.repository.clone_url)
       console.log(executeChoosenim("devel"))
+      console.log(execSync(`nim c ${ process.cwd() }/Nim/koch.nim`, {cwd: gitTempPath}).toString())
       setPRBranch(githubClient)
       // console.log(execSync(`tree`, {cwd: `${ process.cwd() }`}).toString())
 
