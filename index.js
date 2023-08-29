@@ -43,6 +43,11 @@ function isPR(context) {
 }
 
 
+function isIssue(context) {
+  return (context && context.payload && context.payload.issue && !context.payload.pull_request)
+}
+
+
 function formatDuration(seconds) {
   if (typeof seconds === "string") {
     seconds = parseInt(seconds, 10)
@@ -412,13 +417,13 @@ function gitCommitForVersion(semver) {
 
 
 // Only run if this is an "issue_comment" and comment startsWith comment prefixes.
-if (context.eventName === "issue_comment" && ["!nim ", "!fuzz "].includes(githubComment) && (unlockedAllowAll || checkAuthorAssociation()) ) {
+if (context.eventName === "issue_comment" && (isPR(context) || isIssue(context)) && (githubComment.startsWith("!nim ") || githubComment.startsWith("!fuzz ")) && (unlockedAllowAll || checkAuthorAssociation()) ) {
   // Check if we have permissions.
   const githubClient  = new GitHub(cfg('github-token'))
   // Add Reaction of "Eyes" as seen.
   if (addReaction(githubClient, "eyes")) {
     // is Issue
-    if (!isPR(context)) {
+    if (isIssue(context)) {
       const codes         = parseGithubComment(githubComment)
       const cmd           = parseGithubCommand(githubComment)
       let fails           = null
