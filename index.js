@@ -39,12 +39,12 @@ function indentString(str, count = 2, indent = ' ') {
 
 
 function isPR(context) {
-  return (context && context.payload && context.payload.pull_request)
+  return Boolean(context !== undefined && context.payload !== undefined && context.payload.pull_request !== undefined)
 }
 
 
 function isIssue(context) {
-  return (context && context.payload && context.payload.issue)
+  return Boolean(context !== undefined && context.payload !== undefined && context.payload.issue !== undefined)
 }
 
 
