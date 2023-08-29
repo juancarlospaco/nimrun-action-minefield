@@ -312,11 +312,11 @@ function getIR() {
 }
 
 
-function gitInit() {
+function gitInit(url, branch) {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
-    console.log(execSync(`git clone https://github.com/nim-lang/Nim.git ${gitTempPath}`).toString())
-    console.log(execSync(`git config --global user.email "${ context.actor }@nim.org" && git config --global user.name "${ context.actor }" && git config --global advice.detachedHead false && git config --global pull.rebase false && git checkout devel`, {cwd: gitTempPath}).toString())
+    console.log(execSync(`git clone --single-branch --branch ${branch} "${url}" ${gitTempPath}`).toString())
+    console.log(execSync(`git config --global user.email "${ context.actor }@nim.org" && git config --global user.name "${ context.actor }" && git config --global advice.detachedHead false && git config --global pull.rebase false`, {cwd: gitTempPath}).toString())
   }
 }
 
@@ -460,7 +460,7 @@ if (context.eventName === "issue_comment" && (githubComment.startsWith("!nim ") 
       // This part is about finding the specific commit that breaks
       if (fails !== null && works !== null && fails !== works) {
         // Get a range of commits between "FAILS..WORKS"
-        gitInit()
+        gitInit("https://github.com/nim-lang/Nim.git", "devel")
         const failsCommit = gitCommitForVersion(fails)
         const worksCommit = gitCommitForVersion(works)
         if (failsCommit !== null && worksCommit !== null && failsCommit !== worksCommit) {
