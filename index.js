@@ -156,6 +156,7 @@ async function getBranchName(githubClient) {
     pull_number: context.payload.issue.number,
   })
   const result = await pullRequest.head.ref
+  console.log("BRANCHO = ", result)
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result
 };
