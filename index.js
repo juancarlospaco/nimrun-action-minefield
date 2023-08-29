@@ -39,12 +39,12 @@ function indentString(str, count = 2, indent = ' ') {
 
 
 function isPR(context) {
-  return (context && context.payload && context.payload.pull_request && !context.payload.issue)
+  return (context && context.payload && context.payload.pull_request)
 }
 
 
 function isIssue(context) {
-  return (context && context.payload && context.payload.issue && !context.payload.pull_request)
+  return (context && context.payload && context.payload.issue)
 }
 
 
@@ -560,10 +560,10 @@ if (context.eventName === "issue_comment" && (isPR(context) || isIssue(context))
   <li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
   :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
       addIssueComment(githubClient, issueCommentStr)
-      } else {
-        console.log("######################### is PR #########################")
-        console.log(context.payload.pull_request.toJSON() )
-      }
+    } else {
+      console.log("######################### is PR #########################")
+      console.log(context.payload.pull_request.toJSON() )
     }
-    else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
+  }
+  else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
 }
