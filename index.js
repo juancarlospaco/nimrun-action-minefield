@@ -222,6 +222,7 @@ function parseGithubCommand(comment) {
       result = result + " -d:nimArcDebug -d:nimArcIds "
     }
     if (useValgrind) {
+      console.log(installValgrind())
       result = result + " -d:nimAllocPagesViaMalloc -d:useSysAssert -d:useGcAssert -d:nimLeakDetector --debugger:native --debuginfo:on "
     } else {
       result = result + " --run "
@@ -298,6 +299,16 @@ function executeAstGen(codes) {
     }
   } else {
     console.warn('executeAstGen received an empty string code')
+    return ""
+  }
+}
+
+
+function installValgrind() {
+  try {
+    return execSync("sudo apt-get -yq update && sudo apt-get install --no-install-recommends -yq valgrind").toString().trim()
+  } catch (error) {
+    console.warn(error)
     return ""
   }
 }
