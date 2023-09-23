@@ -21,6 +21,5 @@ jobs:
           no-color: true
           yes: true
       - uses: ./
-        shell: bash
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
