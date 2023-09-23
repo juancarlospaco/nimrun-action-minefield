@@ -133,7 +133,6 @@ function versionInfos() {
   return [
     semverParser(execSync("gcc --version").toString()),
     semverParser(execSync("ldd --version").toString()),
-    semverParser(execSync("valgrind --version").toString()),
     semverParser(execSync("node --version").toString()),
     semverParser(execSync("uname --kernel-release").toString()),
   ]
@@ -551,9 +550,8 @@ ${ tripleBackticks }\n`
     issueCommentStr += `<details><summary>Stats</summary><ul>
 <li><b>GCC     </b>\t<code>${ v[0] }</code>
 <li><b>LibC    </b>\t<code>${ v[1] }</code>
-<li><b>Valgrind</b>\t<code>${ v[2] }</code>
-<li><b>NodeJS  </b>\t<code>${ v[3] }</code>
-<li><b>Linux   </b>\t<code>${ v[4] }</code>
+<li><b>NodeJS  </b>\t<code>${ v[2] }</code>
+<li><b>Linux   </b>\t<code>${ v[3] }</code>
 <li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
