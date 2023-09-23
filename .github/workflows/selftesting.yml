@@ -6,7 +6,7 @@ on:
 jobs:
   bisects:
     if: |
-      github.event_name == 'issue_comment'
+      github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '!nim ') && github.event.issue.pull_request == null
     strategy:
       fail-fast: false
       matrix:
