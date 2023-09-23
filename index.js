@@ -137,9 +137,8 @@ function semverParser(str) {
 function versionInfos() {
   return [
     semverParser(execSync("gcc --version").toString()),
-    semverParser(execSync("ldd --version").toString()),
+    semverParser(execSync("clang --version").toString()),
     semverParser(execSync("node --version").toString()),
-    semverParser(execSync("uname --kernel-release").toString()),
   ]
 }
 
@@ -553,11 +552,10 @@ ${ tripleBackticks }\n`
     const duration = ((( (new Date()) - startedDatetime) % 60000) / 1000)
     const v = versionInfos()
     issueCommentStr += `<details><summary>Stats</summary><ul>
-<li><b>GCC     </b>\t<code>${ v[0] }</code>
-<li><b>LibC    </b>\t<code>${ v[1] }</code>
-<li><b>NodeJS  </b>\t<code>${ v[2] }</code>
-<li><b>Linux   </b>\t<code>${ v[3] }</code>
-<li><b>Created </b>\t<code>${ context.payload.comment.created_at }</code>
+<li><b>GCC</b>\t<code>${ v[0] }</code>
+<li><b>Clang</b>\t<code>${ v[1] }</code>
+<li><b>NodeJS</b>\t<code>${ v[2] }</code>
+<li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
