@@ -21,7 +21,6 @@ const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOU
 const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 const debugGodModes    = ["araq"]
 const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
-const commentPrefix    = "!nim "
 let   nimFileCounter   = 0
 
 
@@ -31,11 +30,6 @@ function cfg(key) {
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result;
 };
-
-
-function isPR(context) {
-  return Boolean(context.payload.issue.pull_request && context.payload.issue.pull_request.merged_at === null)
-}
 
 
 function indentString(str, count = 2, indent = ' ') {
@@ -423,7 +417,7 @@ function gitCommitForVersion(semver) {
 
 
 // Only run if this is an "issue_comment" and comment startsWith commentPrefixes.
-if (!isPR(context) && context.eventName === "issue_comment" && context.payload.comment.body.trim().toLowerCase().startsWith(commentPrefix) && (unlockedAllowAll || checkAuthorAssociation()) ) {
+if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (unlockedAllowAll || checkAuthorAssociation()) ) {
   // Check if we have permissions.
   const githubClient  = new GitHub(cfg('github-token'))
   // Add Reaction of "Eyes" as seen.
@@ -434,7 +428,7 @@ if (!isPR(context) && context.eventName === "issue_comment" && context.payload.c
     let fails           = null
     let works           = null
     let commitsLen      = nimFinalVersions.length
-    let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })`
+    let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })<details><summary>${ process.env.RUNNER_OS }</summary>`
     // Check the same code agaisnt all versions of Nim from devel to 1.0
     for (let semver of nimFinalVersions) {
       console.log(executeChoosenim(semver))
@@ -557,7 +551,7 @@ ${ tripleBackticks }\n`
 <li><b>NodeJS</b>\t<code>${ v[2] }</code>
 <li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
+<li><b>Commands</b>\t<code>${ cmd }</code></ul></details></details>
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
     addIssueComment(githubClient, issueCommentStr)
   }
