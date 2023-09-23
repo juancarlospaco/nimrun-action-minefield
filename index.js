@@ -82,7 +82,7 @@ function getFilesizeInBytes(filename) {
 function cleanIR(inputText) {
   // We need to save chars, remove comments, remove empty lines, convert all mixed indentation into 1 tab.
   const mixedIndentRegex = /^( |\t)+/;
-  const result = inputText.trim().replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(line => line.trim() !== '').map((line) => {
+  const result = inputText.trim().replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(line => line.trim() !== '' || !line.startsWith("#undef ")).map((line) => {
     const match = line.match(mixedIndentRegex);
     if (match) {
       const mixedIndent = match[0];
@@ -291,7 +291,7 @@ function executeAstGen(codes) {
   if (typeof codes === "string" && codes.length > 0) {
     fs.writeFileSync(temporaryFile2, `dumpAstGen:\n${ indentString(codes) }`)
     try {
-      return cleanIR(execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString())
+      return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString().trim()
     } catch (error) {
       console.warn(error)
       return ""
