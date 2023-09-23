@@ -13,10 +13,6 @@ jobs:
         nim-version: 'devel'
         no-color: true
         yes: true
-    - name: Install Dependencies
-      run: |
-        sudo apt-get -yq update
-        sudo apt-get install --no-install-recommends -yq valgrind tree
     - uses: ./
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
