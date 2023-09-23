@@ -4,8 +4,15 @@ on:
     types: created
 
 jobs:
-  linux_bisects:
-    runs-on: ubuntu-latest
+  bisects:
+    if: |
+      github.event_name == 'issue_comment'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+    name: ${{ matrix.platform }}-bisects
+    runs-on: ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v3
     - uses: jiro4989/setup-nim-action@v1
@@ -13,35 +20,7 @@ jobs:
         nim-version: 'devel'
         no-color: true
         yes: true
-    - name: linux_bisects
-      shell: bash
-      uses: ./
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-  mac_bisects:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: jiro4989/setup-nim-action@v1
-      with:
-        nim-version: 'devel'
-        no-color: true
-        yes: true
-    - name: mac_bisects
-      shell: bash
-      uses: ./
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-  windows_bisects:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: jiro4989/setup-nim-action@v1
-      with:
-        nim-version: 'devel'
-        no-color: true
-        yes: true
-    - name: mac_bisects
+    - name: bisect
       shell: bash
       uses: ./
       with:
