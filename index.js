@@ -79,6 +79,25 @@ function getFilesizeInBytes(filename) {
 }
 
 
+function cleanIR(inputText) {
+  // We need to save chars, remove comments, remove empty lines, convert all mixed indentation into 1 tab.
+  const mixedIndentRegex = /^( |\t)+/;
+  // Iterate through the lines and convert mixed indentation to tabs
+  const result =  inputText.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(line => line.trim() !== '').map((line) => {
+    const match = line.match(mixedIndentRegex);
+    if (match) {
+      const mixedIndent = match[0];
+      const tabCount = mixedIndent.replace(/ /g, '').length / 4;
+      const tabbedLine = line.replace(mixedIndentRegex, '\t'.repeat(tabCount));
+      return tabbedLine;
+    } else {
+      return line // Line has consistent indentation, keep it unchanged
+    }
+  }).join('\n')
+  return result
+}
+
+
 function checkAuthorAssociation() {
   const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
   let result = (authorPerm === "owner" || authorPerm === "collaborator" || authorPerm === "member" || debugGodModes.includes(context.payload.comment.user.login.toLowerCase()))
@@ -300,8 +319,7 @@ function getIR() {
     result = fs.readFileSync(temporaryOutFile).toString().trim()
   }
   // Clean outs
-  result = result.split('\n').filter(line => line.trim() !== '').join('\n') // Remove empty lines
-  result = result.replace(/\/\*[\s\S]*?\*\//g, '').trim()                   // Remove comments
+  result = cleanIR(result)
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
   return result
 }
