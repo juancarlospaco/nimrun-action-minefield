@@ -33,6 +33,11 @@ function cfg(key) {
 };
 
 
+function isPR(context) {
+  return Boolean(context.payload.issue.pull_request && context.payload.issue.pull_request.merged_at === null)
+}
+
+
 function indentString(str, count = 2, indent = ' ') {
   return str.replace(/^/gm, indent.repeat(count))
 }
@@ -419,7 +424,7 @@ function gitCommitForVersion(semver) {
 
 
 // Only run if this is an "issue_comment" and comment startsWith commentPrefixes.
-if (context.eventName === "issue_comment" && context.payload.comment.body.trim().toLowerCase().startsWith(commentPrefix) && (unlockedAllowAll || checkAuthorAssociation()) ) {
+if (!isPR(context) && context.eventName === "issue_comment" && context.payload.comment.body.trim().toLowerCase().startsWith(commentPrefix) && (unlockedAllowAll || checkAuthorAssociation()) ) {
   // Check if we have permissions.
   const githubClient  = new GitHub(cfg('github-token'))
   // Add Reaction of "Eyes" as seen.
