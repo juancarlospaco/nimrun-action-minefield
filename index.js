@@ -451,18 +451,17 @@ if (context.eventName === "issue_comment" && context.payload.comment.body.trim()
 ${ tripleBackticks }
 ${ output.replace(/^==\d+== /gm, '').trim() }
 ${ tripleBackticks }\n
+<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
+${ tripleBackticks }cpp
+${ getIR() }
+${ tripleBackticks }\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
       // Iff NOT Ok add AST and IR info for debugging purposes.
       if (!isOk) {
-        issueCommentStr += `
-<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
-${ tripleBackticks }cpp
-${ getIR() }
-${ tripleBackticks }\n
-<h3>AST</h3>\n
+        issueCommentStr += `<h3>AST</h3>\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
 ${ tripleBackticks }\n`
