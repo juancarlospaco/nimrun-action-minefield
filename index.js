@@ -82,7 +82,7 @@ function getFilesizeInBytes(filename) {
 function cleanIR(inputText) {
   // We need to save chars, remove comments, remove empty lines, convert all mixed indentation into 1 tab.
   const mixedIndentRegex = /^( |\t)+/;
-  const result = inputText.trim().replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(line => line.trim() !== '' || !line.startsWith("#undef ")).map((line) => {
+  const result = inputText.trim().replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(line => (line.trim() !== '' && !line.startsWith("#undef "))).map((line) => {
     const match = line.match(mixedIndentRegex);
     if (match) {
       const mixedIndent = match[0];
