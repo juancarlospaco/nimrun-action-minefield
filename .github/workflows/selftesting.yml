@@ -13,7 +13,9 @@ jobs:
         nim-version: 'devel'
         no-color: true
         yes: true
-    - uses: ./
+    - name: linux_bisects
+      shell: bash
+      uses: ./
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
   mac_bisects:
@@ -25,8 +27,9 @@ jobs:
         nim-version: 'devel'
         no-color: true
         yes: true
-    - uses: ./
+    - name: mac_bisects
       shell: bash
+      uses: ./
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
   windows_bisects:
@@ -38,7 +41,8 @@ jobs:
         nim-version: 'devel'
         no-color: true
         yes: true
-    - uses: ./
+    - name: mac_bisects
       shell: bash
+      uses: ./
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
