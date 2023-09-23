@@ -291,7 +291,7 @@ function executeAstGen(codes) {
   if (typeof codes === "string" && codes.length > 0) {
     fs.writeFileSync(temporaryFile2, `dumpAstGen:\n${ indentString(codes) }`)
     try {
-      return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString().trim()
+      return cleanIR(execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString())
     } catch (error) {
       console.warn(error)
       return ""
