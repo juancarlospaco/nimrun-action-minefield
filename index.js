@@ -92,7 +92,8 @@ function cleanIR(inputText) {
       const tabbedLine = line.replace(mixedIndentRegex, '\t'.repeat(indentationLevel));
       return tabbedLine;
     } else {
-      return line.replace(mixedIndentRegex, '\t'); // Line has consistent indentation, keep it unchanged
+      // return line.replace(mixedIndentRegex, '\t'); // Line has consistent indentation, keep it unchanged
+      return line
     }
   }).join('\n')
   return result
