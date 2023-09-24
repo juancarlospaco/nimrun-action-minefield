@@ -214,7 +214,7 @@ function parseGithubCommand(comment) {
       result = result + " -d:nodejs -d:nimExperimentalAsyncjsThen -d:nimExperimentalJsfetch "
     }
     const useArc      = hasArc(result)
-    const useValgrind = useArc && hasMalloc(result)
+    const useValgrind = useArc && hasMalloc(result) && process.env.RUNNER_OS !== "Windows"
     if (useArc) {
       result = result + " -d:nimArcDebug -d:nimArcIds "
     }
@@ -303,7 +303,7 @@ function executeAstGen(codes) {
 
 function installValgrind() {
   try {
-    return execSync("sudo apt-get -yq update && sudo apt-get install --no-install-recommends -yq valgrind").toString().trim()
+    return execSync((process.env.RUNNER_OS === "Linux" ? "sudo apt-get -yq update && sudo apt-get install --no-install-recommends -yq valgrind" : "brew update && brew install valgrind")).toString().trim()
   } catch (error) {
     console.warn(error)
     return ""
