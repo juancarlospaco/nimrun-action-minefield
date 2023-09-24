@@ -22,4 +22,5 @@ jobs:
           yes: true
       - uses: ./
         with:
+          shell: bash
           github-token: ${{ secrets.GITHUB_TOKEN }}
