@@ -428,7 +428,8 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (un
     let fails           = null
     let works           = null
     let commitsLen      = nimFinalVersions.length
-    let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })<details><summary>${ process.env.RUNNER_OS }</summary>`
+    const osEmoji       = process.env.RUNNER_OS === "Linux" ? ":penguin:" : process.env.RUNNER_OS === "Windows" ? ":window:" : ":apple:"
+    let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })<details><summary>${ process.env.RUNNER_OS } ${ osEmoji }</summary>`
     // Check the same code agaisnt all versions of Nim from devel to 1.0
     for (let semver of nimFinalVersions) {
       console.log(executeChoosenim(semver))
@@ -551,8 +552,8 @@ ${ tripleBackticks }\n`
 <li><b>NodeJS</b>\t<code>${ v[2] }</code>
 <li><b>Created</b>\t<code>${ context.payload.comment.created_at }</code>
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
-<li><b>Commands</b>\t<code>${ cmd }</code></ul></details></details>
-:robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second.`
+<li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
+:robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second</details>`
     addIssueComment(githubClient, issueCommentStr)
   }
   else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
