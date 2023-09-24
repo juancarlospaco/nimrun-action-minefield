@@ -429,7 +429,7 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (un
     let works           = null
     let commitsLen      = nimFinalVersions.length
     const osEmoji       = process.env.RUNNER_OS === "Linux" ? ":penguin:" : process.env.RUNNER_OS === "Windows" ? ":window:" : ":apple:"
-    let issueCommentStr = `@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })<details><summary>${ process.env.RUNNER_OS } ${ osEmoji }</summary>`
+    let issueCommentStr = `<details><summary>${ process.env.RUNNER_OS } ${ osEmoji }\t@${ context.actor } (${ context.payload.comment.author_association.toLowerCase() })</summary>`
     // Check the same code agaisnt all versions of Nim from devel to 1.0
     for (let semver of nimFinalVersions) {
       console.log(executeChoosenim(semver))
