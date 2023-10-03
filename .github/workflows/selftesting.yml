@@ -30,7 +30,7 @@ jobs:
           profile: Nexus 6
           avd-name: nim_android_bisects
           disable-spellchecker: true
-          script: ./index.js
+          script: node ./index.js
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       #- uses: ./
