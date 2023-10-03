@@ -10,16 +10,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, windows-latest, macos-latest]
+        platform: [ubuntu-latest] #, windows-latest, macos-latest]
     name: ${{ matrix.platform }}-bisects
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
+
       - uses: jiro4989/setup-nim-action@v1
         with:
           nim-version: 'devel'
           no-color: true
           yes: true
-      - uses: ./
+
+      - name: Android Bisects
+        uses: reactivecircus/android-emulator-runner@v2
         with:
+          api-level: 30
+          arch: x86_64
+          profile: Nexus 6
+          avd-name: nim_android_bisects
+          disable-spellchecker: true
+          script: ./
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      #- uses: ./
+      #  with:
+      #    github-token: ${{ secrets.GITHUB_TOKEN }}
