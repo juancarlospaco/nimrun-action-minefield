@@ -24,8 +24,9 @@ jobs:
 
       - uses: ./
         if: |
+          runner.os == 'Linux'   && contains(github.event.comment.body,   '-d:linux') ||
           runner.os == 'Windows' && contains(github.event.comment.body, '-d:windows') ||
-          runner.os == 'macOS'   && contains(github.event.comment.body, '-d:osx')     ||
-          runner.os == 'Linux'
+          runner.os == 'macOS'   && contains(github.event.comment.body,     '-d:osx') ||
+          runner.os == 'Linux'   && !contains(github.event.comment.body, '-d:linux') && !contains(github.event.comment.body, '-d:windows') && !contains(github.event.comment.body, '-d:osx')
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
