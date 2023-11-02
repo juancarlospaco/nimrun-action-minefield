@@ -7,7 +7,6 @@ const marked   = require('marked')
 const { execSync } = require('child_process')
 const {context, GitHub} = require('@actions/github')
 
-
 const startedDatetime  = new Date()
 const tripleBackticks  = "```"
 const gitTempPath      = `${ process.cwd() }/Nim`
