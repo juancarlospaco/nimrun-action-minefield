@@ -480,6 +480,8 @@ ${ executeAstGen(codes) }
 ${ tripleBackticks }\n`
       }
       issueCommentStr += "</details>\n"
+      // Clean out already checked Nim versions to not fill up the disk.
+      console.log(executeChoosenimRemove(semver))
     }
 
 
@@ -549,7 +551,7 @@ ${ tripleBackticks }\n`
             }
             index++
             // Clean out already checked Nim versions to not fill up the disk.
-            console.log(executeChoosenimRemove(commits[midIndex]))
+            console.log(executeChoosenimRemove(commit))
           }
           if (!bugFound) {
             issueCommentStr += `<details><summary>??? :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
