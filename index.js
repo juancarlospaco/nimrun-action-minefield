@@ -262,6 +262,20 @@ function executeChoosenim(semver) {
 }
 
 
+function executeChoosenimRemove(semver) {
+  // Clean out already checked Nim versions to not fill up the disk.
+  console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
+  if (semver.length > 0 && !nimFinalVersions.includes(semver)) {
+    try {
+      return execSync(`choosenim --noColor --skipClean --yes remove "${semver}"`, choosenimNoAnal).toString().trim()
+    } catch (error) {
+      console.warn(error)
+      return ""
+    }
+  }
+}
+
+
 function executeNim(cmd, codes) {
   console.assert(typeof cmd === "string", `cmd must be string, but got ${ typeof cmd }`)
   console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
@@ -492,6 +506,8 @@ ${ tripleBackticks }\n`
                 // else NOT OK then split mid..end
                 commits = commits.slice(midIndex);
               }
+              // Clean out already checked Nim versions to not fill up the disk.
+              console.log(executeChoosenimRemove(commits[midIndex]))
             }
           }
           let commitsNear = "\n<ul>"
@@ -531,6 +547,8 @@ ${ tripleBackticks }\n`
               break
             }
             index++
+            // Clean out already checked Nim versions to not fill up the disk.
+            console.log(executeChoosenimRemove(commits[midIndex]))
           }
           if (!bugFound) {
             issueCommentStr += `<details><summary>??? :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
