@@ -37,6 +37,13 @@ function indentString(str, count = 2, indent = ' ') {
 }
 
 
+function truncateAt65536(str) {
+  if (str.length <= 65536) { return str }
+  const lastWhitespaceIndex = str.lastIndexOf(' ', 65536)
+  return (lastWhitespaceIndex === -1) ? str.substring(0, 65536) : str.substring(0, lastWhitespaceIndex + 1)
+}
+
+
 function formatDuration(seconds) {
   if (typeof seconds === "string") {
     seconds = parseInt(seconds, 10)
@@ -154,7 +161,7 @@ async function addIssueComment(githubClient, issueCommentBody) {
     issue_number: context.issue.number,
     owner       : context.repo.owner,
     repo        : context.repo.repo,
-    body        : issueCommentBody.trim(),
+    body        : truncateAt65536(issueCommentBody),
   }) !== undefined)
 };
 
