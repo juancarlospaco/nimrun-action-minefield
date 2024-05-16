@@ -38,9 +38,19 @@ function indentString(str, count = 2, indent = ' ') {
 
 
 function truncateAt65536(str) {
+  // Error "Body is too long (maximum is 65536 characters)".
   if (str.length <= 65536) { return str }
   const lastWhitespaceIndex = str.lastIndexOf(' ', 65536)
   return (lastWhitespaceIndex === -1) ? str.substring(0, 65536) : str.substring(0, lastWhitespaceIndex + 1)
+}
+
+
+function cleanOutput(str) {
+  // Cleanout and truncate output to 4096 characters.
+  let result = str.replace(/^==\d+== /gm, '').replace(/\s+/g, "").trim().split('\n').filter(line => line.trim() !== '').join('\n')
+  if (result.length <= 4096) { return result }
+  const lastWhitespaceIndex = result.lastIndexOf(' ', 4096)
+  return (lastWhitespaceIndex === -1) ? result.substring(4096) : result.substring(result.length - lastWhitespaceIndex - 1)
 }
 
 
@@ -474,7 +484,7 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (un
       if (issueCommentStr.length < 49152) {  // 75% of 65536
         issueCommentStr += `<h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.replace(/^==\d+== /gm, '').trim().split('\n').filter(line => line.trim() !== '').join('\n') }
+${ cleanOutput(str) }
 ${ tripleBackticks }\n`
       }
       // Error "Body is too long (maximum is 65536 characters)".
