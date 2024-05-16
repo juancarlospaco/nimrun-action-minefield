@@ -484,7 +484,7 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (un
       if (issueCommentStr.length < 49152) {  // 75% of 65536
         issueCommentStr += `<h3>Output</h3>\n
 ${ tripleBackticks }
-${ cleanOutput(str) }
+${ cleanOutput(output) }
 ${ tripleBackticks }\n`
       }
       // Error "Body is too long (maximum is 65536 characters)".
