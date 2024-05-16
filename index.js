@@ -16,7 +16,7 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const extraFlags       = ` -d:nimDebug -d:nimDebugDlOpen -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --lineTrace:off --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const nimFinalVersions = ["devel", "stable", "2.0.4", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
+const nimFinalVersions = ["devel", "stable", "2.0.4", "2.0.0", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOURCE_DATE_EPOCH: Math.floor(Date.now() / 1000).toString()}}  // SOURCE_DATE_EPOCH is same in all runs.
 const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 const debugGodModes    = ["araq"]
@@ -65,7 +65,7 @@ function formatSizeUnits(bytes) {
   else if (bytes >= 1024)       { bytes = (bytes / 1024).toFixed(2) + " Kb"; }
   else if (bytes >  1)          { bytes = bytes + " bytes"; }
   else if (bytes == 1)          { bytes = bytes + " byte"; }
-  else                          { bytes = "0 bytes"; }
+  else                          { bytes = "0"; }
   return bytes + bites;
 }
 
@@ -462,11 +462,17 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (un
         fails = semver
       }
       // Append to reports.
-      issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
+      issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary>\n`
+      // Error "Body is too long (maximum is 65536 characters)".
+      if (issueCommentStr.length < 49152) {  // 75% of 65536
+        issueCommentStr += `<h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.replace(/^==\d+== /gm, '').trim() }
-${ tripleBackticks }\n
-<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
+${ output.replace(/^==\d+== /gm, '').trim().split('\n').filter(line => line.trim() !== '').join('\n') }
+${ tripleBackticks }\n`
+      }
+      // Error "Body is too long (maximum is 65536 characters)".
+      if (issueCommentStr.length < 32768) {  // 50% of 65536
+        issueCommentStr += `<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
 ${ tripleBackticks }\n
@@ -474,12 +480,13 @@ ${ tripleBackticks }\n
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
-      // Iff NOT Ok add AST and IR info for debugging purposes.
-      if (!isOk) {
-        issueCommentStr += `<h3>AST</h3>\n
+        // Iff NOT Ok add AST and IR info for debugging purposes.
+        if (!isOk) {
+          issueCommentStr += `<h3>AST</h3>\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
 ${ tripleBackticks }\n`
+        }
       }
       issueCommentStr += "</details>\n"
       // Clean out already checked Nim versions to not fill up the disk.
