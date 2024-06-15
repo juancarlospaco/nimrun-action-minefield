@@ -37,23 +37,6 @@ function indentString(str, count = 2, indent = ' ') {
 }
 
 
-function truncateAt65536(str) {
-  // Error "Body is too long (maximum is 65536 characters)".
-  if (str.length <= 65536) { return str }
-  const lastWhitespaceIndex = str.lastIndexOf(' ', 65536)
-  return (lastWhitespaceIndex === -1) ? str.substring(0, 65536) : str.substring(0, lastWhitespaceIndex + 1)
-}
-
-
-function cleanOutput(str) {
-  // Cleanout and truncate output to 4096 characters.
-  let result = str.replace(/^==\d+== /gm, '').replace(/\s+/g, "").trim().split('\n').filter(line => line.trim() !== '').join('\n')
-  if (result.length <= 4096) { return result }
-  const lastWhitespaceIndex = result.lastIndexOf(' ', 4096)
-  return (lastWhitespaceIndex === -1) ? result.substring(4096) : result.substring(result.length - lastWhitespaceIndex - 1)
-}
-
-
 function formatDuration(seconds) {
   if (typeof seconds === "string") {
     seconds = parseInt(seconds, 10)
@@ -80,8 +63,7 @@ function formatSizeUnits(bytes) {
   if      (bytes >= 1073741824) { bytes = (bytes / 1073741824).toFixed(2) + " Gb"; }
   else if (bytes >= 1048576)    { bytes = (bytes / 1048576).toFixed(2) + " Mb"; }
   else if (bytes >= 1024)       { bytes = (bytes / 1024).toFixed(2) + " Kb"; }
-  else if (bytes >  1)          { bytes = bytes + " bytes"; }
-  else if (bytes == 1)          { bytes = bytes + " byte"; }
+  else if (bytes >=  1)         { bytes = bytes + " bytes"; }
   else                          { bytes = "0"; }
   return bytes + bites;
 }
@@ -171,7 +153,7 @@ async function addIssueComment(githubClient, issueCommentBody) {
     issue_number: context.issue.number,
     owner       : context.repo.owner,
     repo        : context.repo.repo,
-    body        : truncateAt65536(issueCommentBody),
+    body        : issueCommentBody.trim(),
   }) !== undefined)
 };
 
@@ -479,17 +461,11 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (un
         fails = semver
       }
       // Append to reports.
-      issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary>\n`
-      // Error "Body is too long (maximum is 65536 characters)".
-      if (issueCommentStr.length < 49152) {  // 75% of 65536
-        issueCommentStr += `<h3>Output</h3>\n
+      issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ cleanOutput(output) }
-${ tripleBackticks }\n`
-      }
-      // Error "Body is too long (maximum is 65536 characters)".
-      if (issueCommentStr.length < 32768) {  // 50% of 65536
-        issueCommentStr += `<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
+${ output.replace(/^==\d+== /gm, '').trim() }
+${ tripleBackticks }\n
+<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 ${ tripleBackticks }cpp
 ${ getIR() }
 ${ tripleBackticks }\n
@@ -497,13 +473,12 @@ ${ tripleBackticks }\n
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
-        // Iff NOT Ok add AST and IR info for debugging purposes.
-        if (!isOk) {
-          issueCommentStr += `<h3>AST</h3>\n
+      // Iff NOT Ok add AST and IR info for debugging purposes.
+      if (!isOk) {
+        issueCommentStr += `<h3>AST</h3>\n
 ${ tripleBackticks }nim
 ${ executeAstGen(codes) }
 ${ tripleBackticks }\n`
-        }
       }
       issueCommentStr += "</details>\n"
       // Clean out already checked Nim versions to not fill up the disk.
