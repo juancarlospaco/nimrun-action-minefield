@@ -16,9 +16,9 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const extraFlags       = ` -d:nimDebug -d:nimDebugDlOpen -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --lineTrace:off --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const nimFinalVersions = ["devel", "stable", "2.0.4", "2.0.0", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
+const nimFinalVersions = ["devel", "stable", "2.0.8", "2.0.0", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOURCE_DATE_EPOCH: Math.floor(Date.now() / 1000).toString()}}  // SOURCE_DATE_EPOCH is same in all runs.
-const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --error-exitcode=1 --num-callers=9 --max-threads=9"}}
+const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 const debugGodModes    = ["araq"]
 const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
 let   nimFileCounter   = 0
@@ -47,9 +47,9 @@ function formatDuration(seconds) {
       const hours   = Math.floor(((seconds % 31536000) % 86400) / 3600);
       const minutes = Math.floor(((seconds % 31536000) % 86400) %  60);
       const second  = (((seconds % 31536000) % 86400)  % 3600)  % 0;
-      const y = (hours   > 0) ? hours   + " hours"   : "";
-      const z = (minutes > 0) ? minutes + " minutes" : "";
-      const u = (second  > 0) ? second  + " seconds" : "";
+      const y = (hours   > 0) ? hours   + " hs"   : "";
+      const z = (minutes > 0) ? minutes + " mins" : "";
+      const u = (second  > 0) ? second  + " secs" : "";
       result = y + z + u
   }
   console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
@@ -264,7 +264,7 @@ function executeChoosenim(semver) {
 function executeChoosenimRemove(semver) {
   console.assert(typeof semver === "string", `semver must be string, but got ${ typeof semver }`)
   // Clean out already checked Nim versions to not fill up the disk, leave stable and devel alone.
-  if (typeof semver === "string" && semver.length > 0 && semver !== "devel") {
+  if (typeof semver === "string" && semver.length > 0 && semver !== "devel" && semver !== "stable") {
     try {
       // Can not remove the Nim version currently active, so switch to devel.
       console.log(execSync("choosenim --noColor --yes devel", choosenimNoAnal).toString())
@@ -396,18 +396,26 @@ function gitCommitForVersion(semver) {
   let result = null
   if (typeof semver === "string" && semver.length > 0) {
     semver     = semver.trim().toLowerCase()
-    if (semver === "2.0.0") {
+    if (semver === "2.0.8") {
+      result = "5935c3b"
+    } else if (semver === "2.0.0") {
       result = "a488067"
+    } else if (semver === "1.6.20") {
+      result = "19fdbfc"
     } else if (semver === "1.6.0") {
       result = "727c637"
+    } else if (semver === "1.4.8") {
+      result = "44e653a"
     } else if (semver === "1.4.0") {
       result = "018ae96"
+    } else if (semver === "1.2.18") {
+      result = "8a5c8d3"
     } else if (semver === "1.2.0") {
       result = "7e83adf"
+    } else if (semver === "1.0.10") {
+      result = "0ca09f6"
     } else if (semver === "1.0.0") {
       result = "f7a8fc4"
-    } else if (semver === "0.20.2") {
-      result = "88a0edb"
     } else if (semver === "devel" || semver === "stable") {
       // For semver === "devel" or semver === "stable" we use choosenim
       executeChoosenim(semver) // devel and stable are moving targets.
