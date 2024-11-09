@@ -16,9 +16,9 @@ const temporaryFile2   = `${ process.cwd() }/dumper.nim`
 const temporaryFileAsm = `${ process.cwd() }/@mtemp.nim.c`
 const temporaryOutFile = temporaryFile.replace(".nim", "")
 const extraFlags       = ` -d:nimDebug -d:nimDebugDlOpen -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --lineTrace:off --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
-const nimFinalVersions = ["devel", "stable", "2.0.8", "2.0.0", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
+const nimFinalVersions = ["devel", "stable", "2.0.10", "2.0.0", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOURCE_DATE_EPOCH: Math.floor(Date.now() / 1000).toString()}}  // SOURCE_DATE_EPOCH is same in all runs.
-const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --undef-value-errors=yes --track-origins=yes --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
+const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --undef-value-errors=yes --track-origins=no --show-error-list=no --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 const debugGodModes    = ["araq"]
 const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
 let   nimFileCounter   = 0
@@ -396,8 +396,10 @@ function gitCommitForVersion(semver) {
   let result = null
   if (typeof semver === "string" && semver.length > 0) {
     semver     = semver.trim().toLowerCase()
-    if (semver === "2.0.8") {
-      result = "5935c3b"
+    if (semver === "2.2.0") {
+      result = "78983f1"
+    } else if (semver === "2.0.10") {
+      result = "e941ee1"
     } else if (semver === "2.0.0") {
       result = "a488067"
     } else if (semver === "1.6.20") {
@@ -471,7 +473,7 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (un
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(4096) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(8192) }
 ${ tripleBackticks }\n
 <h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 ${ tripleBackticks }cpp
