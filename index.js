@@ -450,7 +450,7 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && che
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(1024) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(512) }
 ${ tripleBackticks }\n
 <b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 <h3>Stats</h3><ul>
@@ -461,7 +461,7 @@ ${ tripleBackticks }\n
       if (!isOk) {
         issueCommentStr += `<h3>IR</h3>
 ${ tripleBackticks }cpp
-${ getIR().substring(1024) }
+${ getIR().substring(512) }
 ${ tripleBackticks }\n`
       }
       issueCommentStr += "</details>\n"
