@@ -147,11 +147,12 @@ async function addReaction(githubClient, reaction) {
 
 async function addIssueComment(githubClient, issueCommentBody) {
   console.assert(typeof issueCommentBody === "string", `issueCommentBody must be string, but got ${ typeof issueCommentBody }`)
+  console.log("BODY LEN = ", issueCommentBody.length)
   return (await githubClient.issues.createComment({
     issue_number: context.issue.number,
     owner       : context.repo.owner,
     repo        : context.repo.repo,
-    body        : issueCommentBody.trim(),
+    body        : issueCommentBody.trim().substring(65536),
   }) !== undefined)
 };
 
