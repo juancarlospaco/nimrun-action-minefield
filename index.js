@@ -299,23 +299,6 @@ function executeNim(cmd, codes) {
 }
 
 
-function executeAstGen(codes) {
-  console.assert(typeof codes === "string", `codes must be string, but got ${ typeof codes }`)
-  if (typeof codes === "string" && codes.length > 0) {
-    fs.writeFileSync(temporaryFile2, `dumpAstGen:\n${ indentString(codes) }`)
-    try {
-      return execSync(`nim check --verbosity:0 --hints:off --warnings:off --colors:off --lineTrace:off --forceBuild:on --import:std/macros ${temporaryFile2}`).toString().trim()
-    } catch (error) {
-      console.warn(error)
-      return ""
-    }
-  } else {
-    console.warn('executeAstGen received an empty string code')
-    return ""
-  }
-}
-
-
 function installValgrind() {
   try {
     return execSync((process.env.RUNNER_OS === "Linux" ? "sudo apt-get -yq update && sudo apt-get install --no-install-recommends -yq valgrind" : "brew update && brew install valgrind")).toString().trim()
@@ -362,9 +345,9 @@ function gitMetadata(commit) {
   if (typeof commit === "string" && commit.length > 0) {
     console.log(execSync(`git checkout ${ commit.replace("#", "") }`, {cwd: gitTempPath}).toString())
     const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim().toLowerCase()
-    const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim().replace(tripleBackticks, ' ').substring(1024)
+    const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim().replace(tripleBackticks, ' ').substring(512)
     const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim().toLowerCase()
-    const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim().substring(1024)
+    const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim().substring(512)
     return [user, mesage, date, files]
   } else {
     console.warn('gitMetadata received an empty string commit')
@@ -472,11 +455,11 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && che
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(4096) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(2048) }
 ${ tripleBackticks }\n
 <h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 ${ tripleBackticks }cpp
-${ getIR().substring(2048) }
+${ getIR().substring(1024) }
 ${ tripleBackticks }\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
