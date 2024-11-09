@@ -18,7 +18,7 @@ const temporaryOutFile = temporaryFile.replace(".nim", "")
 const extraFlags       = ` -d:nimDebug -d:nimDebugDlOpen -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --lineTrace:off --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
 const nimFinalVersions = ["devel", "stable", "2.0.10", "2.0.0", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOURCE_DATE_EPOCH: Math.floor(Date.now() / 1000).toString()}}  // SOURCE_DATE_EPOCH is same in all runs.
-const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full"}}
+const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --undef-value-errors=yes --track-origins=no --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 let   nimFileCounter   = 0
 
 
@@ -83,7 +83,7 @@ function cleanIR(inputText) {
     if (match) {
       const mixedIndent = match[0];
       const indentationLevel = mixedIndent.includes('\t') ? mixedIndent.length : mixedIndent.length / 4;
-      const tabbedLine = line.replace(mixedIndentRegex, ' '.repeat(indentationLevel));
+      const tabbedLine = line.replace(mixedIndentRegex, '\t'.repeat(indentationLevel));
       return tabbedLine;
     } else {
       return line // Line has consistent indentation, keep it unchanged
@@ -361,9 +361,9 @@ function gitMetadata(commit) {
   if (typeof commit === "string" && commit.length > 0) {
     console.log(execSync(`git checkout ${ commit.replace("#", "") }`, {cwd: gitTempPath}).toString())
     const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim().toLowerCase()
-    const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim()
+    const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim().replace(tripleBackticks, ' ').substring(1024)
     const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim().toLowerCase()
-    const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim()
+    const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim().substring(1024)
     return [user, mesage, date, files]
   } else {
     console.warn('gitMetadata received an empty string commit')
@@ -471,11 +471,11 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && che
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(8192) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(4096) }
 ${ tripleBackticks }\n
 <h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 ${ tripleBackticks }cpp
-${ getIR() }
+${ getIR().substring(2048) }
 ${ tripleBackticks }\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
@@ -485,7 +485,7 @@ ${ tripleBackticks }\n
       if (!isOk) {
         issueCommentStr += `<h3>AST</h3>\n
 ${ tripleBackticks }nim
-${ executeAstGen(codes) }
+${ executeAstGen(codes).substring(2048) }
 ${ tripleBackticks }\n`
       }
       issueCommentStr += "</details>\n"
@@ -546,7 +546,7 @@ ${ tripleBackticks }\n`
               issueCommentStr += `<details><summary><kbd>${comit}</kbd> :arrow_right: :bug:</summary><h3>Diagnostics</h3>\n
   ${user} introduced a bug at <code>${date}</code> on commit <a href=https://github.com/nim-lang/Nim/commit/${ comit.replace("#", "") } >${ comit }</a> with message:\n
   ${ tripleBackticks }
-  ${mesage}
+  ${ mesage }
   ${ tripleBackticks }
   \nThe bug is in the files:\n
   ${ tripleBackticks }
