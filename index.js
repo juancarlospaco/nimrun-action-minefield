@@ -152,7 +152,7 @@ async function addIssueComment(githubClient, issueCommentBody) {
     issue_number: context.issue.number,
     owner       : context.repo.owner,
     repo        : context.repo.repo,
-    body        : issueCommentBody.trim().substring(65536),
+    body        : issueCommentBody.trim().substring(65536),  // GitHub Max body len.
   }) !== undefined)
 };
 
@@ -482,13 +482,6 @@ ${ tripleBackticks }\n
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
-      // Iff NOT Ok add AST and IR info for debugging purposes.
-      if (!isOk) {
-        issueCommentStr += `<h3>AST</h3>\n
-${ tripleBackticks }nim
-${ executeAstGen(codes).substring(2048) }
-${ tripleBackticks }\n`
-      }
       issueCommentStr += "</details>\n"
       // Clean out already checked Nim versions to not fill up the disk.
       console.log(executeChoosenimRemove(semver))
