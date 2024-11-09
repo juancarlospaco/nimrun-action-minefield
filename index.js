@@ -147,7 +147,7 @@ async function addIssueComment(githubClient, issueCommentBody) {
     issue_number: context.issue.number,
     owner       : context.repo.owner,
     repo        : context.repo.repo,
-    body        : issueCommentBody.trim().substring(65536),  // GitHub max body len.
+    body        : issueCommentBody,  // GitHub max body len .substring(65536)
   }) !== undefined)
 };
 
@@ -456,8 +456,7 @@ ${ tripleBackticks }\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
-<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
-      issueCommentStr += "</details>\n"
+<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul></details>\n`
       // Clean out already checked Nim versions to not fill up the disk.
       console.log(executeChoosenimRemove(semver))
     }
@@ -553,7 +552,7 @@ ${ tripleBackticks }\n
 <li><b>Comments</b>\t<code>${ context.payload.issue.comments }</code>
 <li><b>Commands</b>\t<code>${ cmd }</code></ul></details>\n
 :robot: Bug found in <code>${ formatDuration(duration) }</code> bisecting <code>${commitsLen}</code> commits at <code>${ Math.round(commitsLen / duration) }</code> commits per second</details>`
-    addIssueComment(githubClient, issueCommentStr)
+    addIssueComment(githubClient, issueCommentStr.trim())
   }
   else { console.warn("githubClient.addReaction failed, repo permissions error?.") }
 }
