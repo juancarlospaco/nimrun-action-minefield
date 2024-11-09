@@ -30,11 +30,6 @@ function cfg(key) {
 };
 
 
-function indentString(str, count = 2, indent = ' ') {
-  return str.replace(/^/gm, indent.repeat(count))
-}
-
-
 function formatDuration(seconds) {
   if (typeof seconds === "string") {
     seconds = parseInt(seconds, 10)
@@ -152,7 +147,7 @@ async function addIssueComment(githubClient, issueCommentBody) {
     issue_number: context.issue.number,
     owner       : context.repo.owner,
     repo        : context.repo.repo,
-    body        : issueCommentBody.trim().substring(65536),  // GitHub Max body len.
+    body        : issueCommentBody.trim().substring(65536),  // GitHub max body len.
   }) !== undefined)
 };
 
@@ -455,16 +450,20 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && che
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(2048) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(4096) }
 ${ tripleBackticks }\n
-<h3>IR</h3><b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
-${ tripleBackticks }cpp
-${ getIR().substring(1024) }
-${ tripleBackticks }\n
+<b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
+      // Iff NOT Ok add AST and IR info for debugging purposes.
+      if (!isOk) {
+        issueCommentStr += `<h3>IR</h3>
+${ tripleBackticks }cpp
+${ getIR().substring(2048) }
+${ tripleBackticks }\n`
+      }
       issueCommentStr += "</details>\n"
       // Clean out already checked Nim versions to not fill up the disk.
       console.log(executeChoosenimRemove(semver))
