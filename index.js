@@ -450,20 +450,13 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && che
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(512) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(2048) }
 ${ tripleBackticks }\n
 <b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
 <h3>Stats</h3><ul>
 <li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
 <li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
 <li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul>\n`
-      // Iff NOT Ok add AST and IR info for debugging purposes.
-      if (!isOk) {
-        issueCommentStr += `<h3>IR</h3>
-${ tripleBackticks }cpp
-${ getIR().substring(512) }
-${ tripleBackticks }\n`
-      }
       issueCommentStr += "</details>\n"
       // Clean out already checked Nim versions to not fill up the disk.
       console.log(executeChoosenimRemove(semver))
