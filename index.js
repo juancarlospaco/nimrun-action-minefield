@@ -70,24 +70,6 @@ function getFilesizeInBytes(filename) {
 }
 
 
-function cleanIR(inputText) {
-  // We need to save chars, remove comments, remove empty lines, convert all mixed indentation into 1 space indentation.
-  const mixedIndentRegex = /^( |\t)+/;
-  const result = inputText.trim().replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(line => (line.trim() !== '' && !line.startsWith("#undef ") && !line.startsWith("#define NIM_INTBITS") && !line.startsWith("#define FX_"))).map((line) => {
-    const match = line.match(mixedIndentRegex);
-    if (match) {
-      const mixedIndent = match[0];
-      const indentationLevel = mixedIndent.includes('\t') ? mixedIndent.length : mixedIndent.length / 4;
-      const tabbedLine = line.replace(mixedIndentRegex, '\t'.repeat(indentationLevel));
-      return tabbedLine;
-    } else {
-      return line // Line has consistent indentation, keep it unchanged
-    }
-  }).join('\n')
-  return result
-}
-
-
 function checkAuthorAssociation() {
   const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
   let result = (authorPerm === "owner" || authorPerm === "collaborator" || authorPerm === "member" || context.payload.comment.user.login.toLowerCase() === "juancarlospaco")
@@ -304,27 +286,6 @@ function installValgrind() {
 }
 
 
-function getIR() {
-  let result = ""
-  // Target C
-  if (fs.existsSync(temporaryFileAsm)) {
-    result = fs.readFileSync(temporaryFileAsm).toString().trim()
-  }
-  // Target C++
-  else if (fs.existsSync(temporaryFileAsm + "pp")) {
-    result = fs.readFileSync(temporaryFileAsm + "pp").toString().trim()
-  }
-  // Target JS
-  else if (fs.existsSync(temporaryOutFile)) {
-    result = fs.readFileSync(temporaryOutFile).toString().trim()
-  }
-  // Clean outs
-  result = cleanIR(result)
-  console.assert(typeof result === "string", `result must be string, but got ${ typeof result }`)
-  return result
-}
-
-
 function gitInit() {
   // Git clone Nim repo and checkout devel
   if (!fs.existsSync(gitTempPath)) {
@@ -450,13 +411,10 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && che
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(2048) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(4098) }
 ${ tripleBackticks }\n
-<b>Compiled filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\n
-<h3>Stats</h3><ul>
-<li><b>Started</b>\t<code>${ started.toISOString().split('.').shift()  }</code>
-<li><b>Finished</b>\t<code>${ finished.toISOString().split('.').shift() }</code>
-<li><b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul></details>\n`
+<b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\t
+<b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul></details>\n`
       // Clean out already checked Nim versions to not fill up the disk.
       console.log(executeChoosenimRemove(semver))
     }
