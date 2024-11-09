@@ -124,7 +124,7 @@ async function addReaction(githubClient, reaction) {
 
 async function addIssueComment(githubClient, issueCommentBody) {
   console.assert(typeof issueCommentBody === "string", `issueCommentBody must be string, but got ${ typeof issueCommentBody }`)
-  console.log("BODY LEN = ", issueCommentBody.length)
+  console.log(`BODY LEN = ${ issueCommentBody.length } (${ 65536 - issueCommentBody.length } Chars left)`)
   return (await githubClient.issues.createComment({
     issue_number: context.issue.number,
     owner       : context.repo.owner,
@@ -301,9 +301,9 @@ function gitMetadata(commit) {
   if (typeof commit === "string" && commit.length > 0) {
     console.log(execSync(`git checkout ${ commit.replace("#", "") }`, {cwd: gitTempPath}).toString())
     const user   = execSync("git log -1 --pretty=format:'%an'", {cwd: gitTempPath}).toString().trim().toLowerCase()
-    const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim().replace(tripleBackticks, ' ').substring(512)
+    const mesage = execSync("git log -1 --pretty='%B'", {cwd: gitTempPath}).toString().trim().replace(tripleBackticks, ' ').substring(1024)
     const date   = execSync("git log -1 --pretty=format:'%ai'", {cwd: gitTempPath}).toString().trim().toLowerCase()
-    const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim().substring(512)
+    const files  = execSync("git diff-tree --no-commit-id --name-only -r HEAD", {cwd: gitTempPath}).toString().trim().substring(1024)
     return [user, mesage, date, files]
   } else {
     console.warn('gitMetadata received an empty string commit')
