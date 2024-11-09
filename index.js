@@ -18,9 +18,7 @@ const temporaryOutFile = temporaryFile.replace(".nim", "")
 const extraFlags       = ` -d:nimDebug -d:nimDebugDlOpen -d:ssl -d:nimDisableCertificateValidation --forceBuild:on --colors:off --verbosity:0 --hints:off --lineTrace:off --nimcache:${ process.cwd() } --out:${temporaryOutFile} ${temporaryFile}`
 const nimFinalVersions = ["devel", "stable", "2.0.10", "2.0.0", "1.6.20", "1.4.8", "1.2.18", "1.0.10"]
 const choosenimNoAnal  = {env: {...process.env, CHOOSENIM_NO_ANALYTICS: "1", SOURCE_DATE_EPOCH: Math.floor(Date.now() / 1000).toString()}}  // SOURCE_DATE_EPOCH is same in all runs.
-const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --undef-value-errors=yes --track-origins=no --show-error-list=no --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
-const debugGodModes    = ["araq"]
-const unlockedAllowAll = true  // true == Users can Bisect  |  false == Only Admins can Bisect.
+const valgrindLeakChck = {env: {...process.env, VALGRIND_OPTS: "--quiet --tool=memcheck --leak-check=full --show-leak-kinds=all --errors-for-leak-kinds=all --undef-value-errors=yes --track-origins=no --show-error-list=yes --keep-debuginfo=yes --show-emwarns=yes --demangle=yes --smc-check=none --num-callers=9 --max-threads=9"}}
 let   nimFileCounter   = 0
 
 
@@ -97,7 +95,7 @@ function cleanIR(inputText) {
 
 function checkAuthorAssociation() {
   const authorPerm = context.payload.comment.author_association.trim().toLowerCase()
-  let result = (authorPerm === "owner" || authorPerm === "collaborator" || authorPerm === "member" || debugGodModes.includes(context.payload.comment.user.login.toLowerCase()))
+  let result = (authorPerm === "owner" || authorPerm === "collaborator" || authorPerm === "member" || context.payload.comment.user.login.toLowerCase() === "juancarlospaco")
   console.assert(typeof result === "boolean", `result must be boolean, but got ${ typeof result }`)
   return result
 };
@@ -443,7 +441,7 @@ function gitCommitForVersion(semver) {
 
 
 // Only run if this is an "issue_comment" and comment startsWith commentPrefixes.
-if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && (unlockedAllowAll || checkAuthorAssociation()) ) {
+if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && checkAuthorAssociation()) {
   // Check if we have permissions.
   const githubClient  = new GitHub(cfg('github-token'))
   // Add Reaction of "Eyes" as seen.
