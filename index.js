@@ -411,7 +411,7 @@ if (context.payload.comment.body.trim().toLowerCase().startsWith("!nim ") && che
       // Append to reports.
       issueCommentStr += `<details><summary><kbd>${semver}</kbd>\t${thumbsUp}</summary><h3>Output</h3>\n
 ${ tripleBackticks }
-${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(8196) }
+${ output.trim().split('\n').filter(line => line.trim() !== '').join('\n').substring(4098) }
 ${ tripleBackticks }\n
 <b>Filesize</b>\t<code>${ formatSizeUnits(getFilesizeInBytes(temporaryOutFile)) }</code>\t
 <b>Duration</b>\t<code>${ formatDuration((((finished - started) % 60000) / 1000)) }</code></ul></details>\n`
