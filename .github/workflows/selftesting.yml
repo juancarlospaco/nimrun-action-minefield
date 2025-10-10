@@ -52,6 +52,7 @@ jobs:
           runner.os == 'Windows'
         run: |
           echo "VCPKG_ROOT=${{ github.workspace }}\vcpkg" >> $env:GITHUB_ENV
+          refreshenv
         shell: 'powershell'
 
       - uses: jiro4989/setup-nim-action@v1
