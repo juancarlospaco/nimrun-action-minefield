@@ -38,6 +38,22 @@ jobs:
           echo "C:\Program Files\OpenSSL-Win64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         shell: 'powershell'
 
+      - name: Setup vcpkg
+        if: |
+          runner.os == 'Windows'
+        run: |
+          git clone https://github.com/microsoft/vcpkg
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install openssl:x64-windows
+        shell: 'cmd'
+      
+      - name: Set vcpkg environment
+        if: |
+          runner.os == 'Windows'
+        run: |
+          echo "VCPKG_ROOT=${{ github.workspace }}\vcpkg" >> $env:GITHUB_ENV
+        shell: 'powershell'
+
       - uses: jiro4989/setup-nim-action@v1
         with:
           nim-version: 'stable'
