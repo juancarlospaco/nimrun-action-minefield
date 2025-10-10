@@ -22,7 +22,7 @@ jobs:
         run: choco install openssl.light --version=1.1.1.0  # OpenSSL 3.x removed SSL_library_init
         shell: 'powershell'
   
-      - uses: jiro4989/setup-nim-action@v1
+      - uses: jiro4989/setup-nim-action@v1  # v2 wont work here, because uses hardcoded nim versions
         with:
           nim-version: 'devel'
           no-color: true
