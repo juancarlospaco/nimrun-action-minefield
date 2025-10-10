@@ -18,10 +18,9 @@ jobs:
 
       - uses: jiro4989/setup-nim-action@v1
         with:
-          nim-version: 'stable'
+          nim-version: '2.2.0'
           no-color: true
           yes: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: ./
         if: |
