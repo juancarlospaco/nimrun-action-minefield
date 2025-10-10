@@ -19,16 +19,9 @@ jobs:
       - name: Install OpenSSL (Windows)
         if: |
           runner.os == 'Windows'
-        run: choco install openssl.light --version=1.1.1.0
+        run: choco install openssl.light --version=1.1.1.0  # OpenSSL 3.x removed SSL_library_init
         shell: 'powershell'
-      
-      - name: Add OpenSSL to PATH (Windows)
-        if: |
-          runner.os == 'Windows'
-        run: |
-          echo "C:\Program Files\OpenSSL-Win64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        shell: 'powershell'
-
+  
       - uses: jiro4989/setup-nim-action@v1
         with:
           nim-version: 'devel'
