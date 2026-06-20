@@ -13,6 +13,8 @@ jobs:
         platform: [ubuntu-latest, windows-latest, macos-latest]
     name: ${{ matrix.platform }}-bisects
     runs-on: ${{ matrix.platform }}
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true       # NODE <20 is deprecated.
     steps:
       - uses: actions/checkout@v5
 
@@ -23,8 +25,6 @@ jobs:
         shell: 'powershell'
   
       - uses: jiro4989/setup-nim-action@v1  # v2 wont work here, because uses hardcoded nim versions
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # NODE <20 is deprecated.
         with:
           nim-version: 'devel'
           no-color: true
