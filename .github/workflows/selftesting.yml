@@ -15,6 +15,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true       # NODE <20 is deprecated.
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true  # http://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners
     steps:
       - uses: actions/checkout@v5
 
